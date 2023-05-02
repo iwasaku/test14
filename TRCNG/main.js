@@ -1,4 +1,4 @@
-//console.log = function () { };  // ログを出す時にはコメントアウトする
+console.log = function () { };  // ログを出す時にはコメントアウトする
 
 const FPS = 60;  // 60フレ
 
@@ -379,7 +379,7 @@ const HIT_TYPE = defineEnum({
     },
     CRITICAL: {
         value: tmpEnumValue++,
-        string: '★★★★★★★★'
+        string: ''
     },
 });
 
@@ -958,7 +958,6 @@ tm.define("GameScene", {
                 }
                 break;
             case GAME_MODE.COUNT_INIT:
-                gameMode = GAME_MODE.COUNT;
                 countNum = 1;
                 countNumCounter = 0;
                 countSE.play();
@@ -969,6 +968,11 @@ tm.define("GameScene", {
                 }
                 this.countNumLabel.text = countNum;
                 this.countNumLabel.setAlpha(0.0);
+                if (tball.hitType == HIT_TYPE.CRITICAL) {
+                    gameMode = GAME_MODE.GET_INIT;
+                } else {
+                    gameMode = GAME_MODE.COUNT;
+                }
             // THROUGH
             case GAME_MODE.COUNT:
                 if (--countNumDispCounter > 0) {
