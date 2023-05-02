@@ -1284,14 +1284,14 @@ tm.define("TBall", {
                     let curveRatio = 1.0;
                     if (this.curveTimer > 0) {
                         curveRatio = 1.7;
-                        this.correctDelta.x = (-endPos.x + trcn.x);
+                        this.correctDelta.x = (-endPos.x + (trcn.x + myRandom(0, 20) - 10));
                         if (this.correctDelta.x > 128) {
                             this.correctDelta.x = 128;
                         }
                         if (this.correctDelta.x < -128) {
                             this.correctDelta.x = -128;
                         }
-                        this.correctDelta.y = (-endPos.y + trcn.y);
+                        this.correctDelta.y = (-endPos.y + (trcn.y + myRandom(0, 20) - 10));
                         if (this.correctDelta.y > 128) {
                             this.correctDelta.y = 128;
                         }
@@ -1362,8 +1362,8 @@ tm.define("TBall", {
                         // 着弾点がターゲットリングの内側
                         if (tgtRingRadius <= 256.0 * 0.3) {
                             // 0〜30%：エクセレント＝1.85倍
-                            if (tmpDist < 256.0 * 0.05) {
-                                // エクセレントかつ着弾点が中心から5%以内ならクリティカル
+                            if (tmpDist < 256.0 * 0.01) {
+                                // エクセレントかつ着弾点が中心から1%以内ならクリティカル
                                 correctRatio = 10000; // basicRatio=1% getRatio=1%の時でも100%になる倍率
                                 this.point *= 50.0;
                                 this.hitType = HIT_TYPE.CRITICAL;
