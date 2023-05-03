@@ -1363,10 +1363,17 @@ tm.define("TBall", {
                         if (tgtRingRadius <= 256.0 * 0.3) {
                             // 0〜30%：エクセレント＝1.85倍
                             if (tmpDist < 256.0 * 0.01) {
-                                // エクセレントかつ着弾点が中心から1%以内ならクリティカル
-                                correctRatio = 10000; // basicRatio=1% getRatio=1%の時でも100%になる倍率
-                                this.point *= 50.0;
-                                this.hitType = HIT_TYPE.CRITICAL;
+                                // エクセレントかつ着弾点が中心から1%以内なら1%の確率でクリティカル
+                                if (myRandom(1, 100) === 1) {
+                                    correctRatio = 10000; // basicRatio=1% getRatio=1%の時でも100%になる倍率
+                                    this.point *= 50.0;
+                                    this.hitType = HIT_TYPE.CRITICAL;
+                                } else {
+                                    // 抽選に外れたのでやっぱりエクセレント
+                                    correctRatio = 1.85;
+                                    this.point *= 10.0;
+                                    this.hitType = HIT_TYPE.EXCELLENT;
+                                }
                             } else {
                                 correctRatio = 1.85;
                                 this.point *= 10.0;
