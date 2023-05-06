@@ -903,7 +903,7 @@ tm.define("GameScene", {
                         } else {
                             bounceTo.x = trcn.x - 256;
                         }
-                        bounceTo.y = trcn.y - 256;
+                        bounceTo.y = trcn.y - (256 + 128);
                         bounceDelta.x = (bounceTo.x - bounceFrom.x) / 15.0;
                         bounceDelta.y = (bounceTo.y - bounceFrom.y) / 15.0;
                         bounceCounter = 0;
@@ -1231,10 +1231,8 @@ tm.define("TBall", {
                     let startPos = this.vecArray.shift();
                     let dx = endPos.x - startPos.x;
                     let dy = endPos.y - startPos.y;
-                    console.log("delta=" + dx + "," + dy);
 
                     let moveDist = calcDistVec(startPos, endPos);
-                    console.log("moveDist=" + moveDist);
 
                     // 移動量が少ない
                     if (moveDist < 128) {
@@ -1245,7 +1243,6 @@ tm.define("TBall", {
                         this.zRot = 0;
                         this.zRotOfs = 0;
                         this.status = TB_STATUS.WAIT;
-                        console.log("nothing");
                         break;
                     }
 
@@ -1259,7 +1256,6 @@ tm.define("TBall", {
                         this.zRot = 0;
                         this.zRotOfs = 0;
                         this.status = TB_STATUS.WAIT;
-                        console.log("dy plus");
                         break;
                     }
 
@@ -1273,7 +1269,6 @@ tm.define("TBall", {
                         this.zRot = 0;
                         this.zRotOfs = 0;
                         this.status = TB_STATUS.WAIT;
-                        console.log("|dy|<|dx|");
                         break;
                     }
 
@@ -1318,7 +1313,6 @@ tm.define("TBall", {
                         this.zRotOfs = 0;
                         this.status = TB_STATUS.MOVE_SHORT;
                         this.moveCounter = 0;
-                        console.log("too short");
                         break;
                     }
 
@@ -1328,13 +1322,11 @@ tm.define("TBall", {
                         // 画面外へ飛ばす
                         this.status = TB_STATUS.MOVE_LONG;
                         this.moveCounter = 0;
-                        console.log("too long");
                         break;
                     }
 
                     // ターゲットリングの中心と着弾点との距離
                     let tmpDist = calcDist(endPos.x + this.correctDelta.x * 60, endPos.y + this.correctDelta.y * 60, tgtRingW.x, tgtRingW.y);
-                    console.log("tmpDist=" + tmpDist);
                     this.point = 256 - tmpDist;    // 256~0点
                     this.point += 256 * (scoreTimer / (60 * 60))    // 256~0点
 
@@ -1342,7 +1334,6 @@ tm.define("TBall", {
                     if (tmpDist >= 256) {
                         this.status = TB_STATUS.MOVE_MISS;
                         this.moveCounter = 0;
-                        console.log("miss");
                         break;
                     }
 
@@ -1402,22 +1393,13 @@ tm.define("TBall", {
 
                     let getRandom = myRandom(1, 100);
 
-                    console.log("tgtRingG.size=" + tgtRingG.size);
-                    console.log("getRatio=" + getRatio);
-                    console.log("correctRatio=" + correctRatio);
-                    console.log("getRandom=" + getRandom);
                     if (getRandom <= basicRatio * getRatio * correctRatio * curveRatio) {
-                        console.log("get");
                         this.isGet = Boolean(1);
                     } else {
-                        console.log("missing");
                         this.isGet = Boolean(0);
                     }
                     this.status = TB_STATUS.MOVE_HIT;
                     this.moveCounter = 0;
-                    console.log("hit");
-                    console.log("point=" + this.point);
-                    console.log("hit_type=" + this.hitType.value);
                 } while (false);
             } else if (pointing.getPointing()) {
                 // タッチした最初のフレームは配列を初期化する
@@ -1425,8 +1407,8 @@ tm.define("TBall", {
                     this.vecArray.splice(0);
                 }
                 // タッチした位置に徐々に近づける
-                this.x += (pointing.x - this.x) * 0.9;
-                this.y += (pointing.y - this.y) * 0.9;
+                this.x += (pointing.x - this.x) * 0.3;
+                this.y += (pointing.y - this.y) * 0.3;
                 let tmpVec = tm.geom.Vector2(this.x, this.y);
                 this.vecArray.push(tmpVec);
                 if (this.vecArray.length > 30) {
