@@ -453,17 +453,17 @@ const startThetaTbl = [
     Math.PI,
 ];
 const atkTbl = [
-    { min: 5.0 * FPS, max: 8.5 * FPS },
-    { min: 4.5 * FPS, max: 8.3 * FPS },
-    { min: 4.0 * FPS, max: 8.1 * FPS },
-    { min: 3.5 * FPS, max: 8.0 * FPS },
-    { min: 3.0 * FPS, max: 7.5 * FPS },
-    { min: 2.5 * FPS, max: 7.0 * FPS },
-    { min: 2.0 * FPS, max: 6.5 * FPS },
-    { min: 1.5 * FPS, max: 6.0 * FPS },
-    { min: 1.0 * FPS, max: 5.5 * FPS },
-    { min: 1.0 * FPS, max: 5.0 * FPS },
-    { min: 0.5 * FPS, max: 5.0 * FPS },
+    { min: 5.0 * FPS, max: 7.5 * FPS },
+    { min: 4.5 * FPS, max: 7.3 * FPS },
+    { min: 4.0 * FPS, max: 7.1 * FPS },
+    { min: 3.5 * FPS, max: 7.0 * FPS },
+    { min: 3.0 * FPS, max: 6.5 * FPS },
+    { min: 2.5 * FPS, max: 6.0 * FPS },
+    { min: 2.0 * FPS, max: 5.5 * FPS },
+    { min: 1.5 * FPS, max: 5.0 * FPS },
+    { min: 1.0 * FPS, max: 4.5 * FPS },
+    { min: 1.0 * FPS, max: 4.0 * FPS },
+    { min: 0.5 * FPS, max: 4.0 * FPS },
 ];
 const counterAtkTbl = [
     128, //5
