@@ -1456,7 +1456,7 @@ tm.define("TBall", {
                                 trcn.atkTimer = 0;
                             }
                         } else {
-                            if (myRandom(1, 1000) === 1) {
+                            if (myRandom(1, 256) === 1) {
                                 trcn.atkTimer = 0;
                             }
                         }
