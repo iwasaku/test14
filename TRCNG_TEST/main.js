@@ -653,7 +653,7 @@ tm.define("TitleScene", {
             self.app.replaceScene(GameScene());
         };
         this.nmlsButton.onpointingstart = function () {
-            window.location.href = "../NMLSG/index.html";
+            window.location.href = "../NMLSG/";
         };
     },
 
