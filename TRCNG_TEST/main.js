@@ -637,7 +637,7 @@ tm.define("TitleScene", {
         // プレイデータのLOAD
         {
             let tmp = null;
-            tmp = localStorage.getItem('trcng_tpc');
+            tmp = localStorage.getItem('trcng.tpc');
             totalPlayCount = (tmp === null) ? 0 : parseInt(tmp);
             if (totalPlayCount >= 1) {
                 this.nmlsButton.wakeUp();
