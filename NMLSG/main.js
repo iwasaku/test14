@@ -2065,7 +2065,7 @@ function makeTrophyArray() {
     if (totalPlayCount >= 90) trophyArray[8] = 1;
     if (totalPlayCount >= 100) trophyArray[9] = 1;
 
-    // 今回の得点
+    // ハイスコア
     if (maxScore >= 4000) trophyArray[10] = 1;
     if (maxScore >= 8000) trophyArray[11] = 1;
     if (maxScore >= 12000) trophyArray[12] = 1;
@@ -2089,7 +2089,7 @@ function makeTrophyArray() {
     if (totalScore >= 180000) trophyArray[28] = 1;
     if (totalScore >= 200000) trophyArray[29] = 1;
 
-    // 今回の最終プレイ面数（クリアした面では無い）
+    // 最高プレイ面数（クリアした面では無い）
     if (maxStage >= 1) trophyArray[30] = 1;
     if (maxStage >= 2) trophyArray[31] = 1;
     if (maxStage >= 3) trophyArray[32] = 1;
@@ -2101,7 +2101,7 @@ function makeTrophyArray() {
     if (maxStage >= 9) trophyArray[38] = 1;
     if (maxStage >= 10) trophyArray[39] = 1;
 
-    // 今回のGreat or Excellentの回数
+    // Great or Excellentの最高回数
     if (maxGreatCount >= 1) trophyArray[40] = 1;
     if (maxGreatCount >= 2) trophyArray[41] = 1;
     if (maxGreatCount >= 3) trophyArray[42] = 1;
@@ -2124,7 +2124,7 @@ function makeTrophyArray() {
     if (totalGreatCount >= 180) trophyArray[58] = 1;
     if (totalGreatCount >= 200) trophyArray[59] = 1;
 
-    // 今回のExcellentの回数
+    // Excellentの最高回数
     if (maxExcellentCount >= 1) trophyArray[60] = 1;
     if (maxExcellentCount >= 2) trophyArray[61] = 1;
     if (maxExcellentCount >= 3) trophyArray[62] = 1;
@@ -2147,7 +2147,7 @@ function makeTrophyArray() {
     if (totalExcellentCount >= 180) trophyArray[78] = 1;
     if (totalExcellentCount >= 200) trophyArray[79] = 1;
 
-    // 今回のカーブボールの回数
+    // カーブボールの最高回数
     if (maxCurveCount >= 1) trophyArray[80] = 1;
     if (maxCurveCount >= 2) trophyArray[81] = 1;
     if (maxCurveCount >= 3) trophyArray[82] = 1;
@@ -2199,26 +2199,26 @@ function checkAndSaveTrophy(tmpScore, tmpStage, tmpGreatCount, tmpExcellentCount
     totalScore += tmpScore;
     if (totalScore > MAX_TOTAL_COUNT) totalScore = MAX_TOTAL_COUNT;
 
-    // 今回の最終プレイ面数（クリアした面では無い）
-    // 前回値よりも大きければ更新
+    // 今回のプレイ面数（クリアした面では無い）
+    // 最大値よりも大きければ更新
     if (maxStage < tmpStage) maxStage = tmpStage;
 
     // 今回のGreat or Excellentの回数
-    // 前回値よりも大きければ更新
+    // 最大値よりも大きければ更新
     if (maxGreatCount < tmpGreatCount) maxGreatCount = tmpGreatCount;
     // 累計のGreat or Excellentの回数
     totalGreatCount += tmpGreatCount;
     if (totalGreatCount > MAX_TOTAL_COUNT) totalGreatCount = MAX_TOTAL_COUNT;
 
     // 今回のExcellentの回数
-    // 前回値よりも大きければ更新
+    // 最大値よりも大きければ更新
     if (maxExcellentCount < tmpExcellentCount) maxExcellentCount = tmpExcellentCount;
     // 累計のExcellentの回数
     totalExcellentCount += tmpExcellentCount;
     if (totalExcellentCount > MAX_TOTAL_COUNT) totalExcellentCount = MAX_TOTAL_COUNT;
 
     // 今回のカーブボールの回数
-    // 前回値よりも大きければ更新
+    // 最大値よりも大きければ更新
     if (maxCurveCount < tmpCurveCount) maxCurveCount = tmpCurveCount;
     // 累計のカーブボールの回数
     totalCurveCount += tmpCurveCount;
