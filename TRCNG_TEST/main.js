@@ -1854,7 +1854,6 @@ function calcDistVec(aVec, bVec) {
 // 実績チェック＆Save
 function checkTrophy() {
     // 累計プレイ回数
-    totalPlayCount++;
-    console.log("totalPlayCount:" + totalPlayCount);
-    //    localStorage.setItem('trcng_tpc', totalPlayCount);
+    if (totalPlayCount < 1) totalPlayCount++;
+    localStorage.setItem('trcng.tpc', totalPlayCount);
 }

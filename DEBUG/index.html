@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script>
+        window.onload = function readData() {
+            readDataInternalSelect('trcng.tpc', 'trcng_play_count', 0, 0);
+
+            readDataInternal('nmlsg.tpc', 'total_play_count', 0);
+
+            readDataInternal('nmlsg.msc', 'max_score', 0);
+            readDataInternal('nmlsg.tsc', 'total_score', 0);
+
+            readDataInternal('nmlsg.mst', 'max_stage', 1);
+
+            readDataInternal('nmlsg.mgc', 'max_great_count', 0);
+            readDataInternal('nmlsg.tgc', 'total_great_count', 0);
+
+            readDataInternal('nmlsg.mec', 'max_excellent_count', 0);
+            readDataInternal('nmlsg.tec', 'total_excellent_count', 0);
+
+            readDataInternal('nmlsg.mcc', 'max_curve_count', 0);
+            readDataInternal('nmlsg.tcc', 'total_curve_count', 0);
+
+            readDataInternalSelect('nmlsg.dbg', 'debug_flag', 0, 0);
+            readDataInternalSelect('nmlsg.fcr', 'force_critical', 0, 0);
+            readDataInternalSelect('nmlsg.fex', 'force_excellent', 0, 0);
+            readDataInternalSelect('nmlsg.fgr', 'force_great', 0, 0);
+            readDataInternalSelect('nmlsg.fen', 'fix_enemy_num', -1, 1);
+            readDataInternalSelect('nmlsg.fmn', 'fix_move_num', -1, 1);
+        }
+        function readDataInternal(keyName, elemId, defaultNum) {
+            let tmpItem = null;
+            let tmpData = null;
+            let tmpElem = null;
+            tmpItem = localStorage.getItem(keyName);
+            tmpData = (tmpItem == null) ? defaultNum : tmpItem;
+            tmpElem = document.getElementById(elemId);
+            tmpElem.value = tmpData;
+        }
+        function readDataInternalSelect(keyName, elemId, defaultNum, offset) {
+            let tmpItem = localStorage.getItem(keyName);
+            let tmpData = (tmpItem == null) ? defaultNum : tmpItem;
+            let tmpElem = document.getElementById(elemId);
+            let tmpIdx = parseInt(tmpData) + parseInt(offset);
+            tmpElem.options[tmpIdx].selected = true;
+        }
+        function update() {
+            updateDataInternal('trcng.tpc', 'trcng_play_count');
+
+            updateDataInternal('nmlsg.tpc', 'total_play_count');
+            updateDataInternal('nmlsg.msc', 'max_score');
+            updateDataInternal('nmlsg.tsc', 'total_score');
+            updateDataInternal('nmlsg.mst', 'max_stage');
+            updateDataInternal('nmlsg.mgc', 'max_great_count');
+            updateDataInternal('nmlsg.tgc', 'total_great_count');
+            updateDataInternal('nmlsg.mec', 'max_excellent_count');
+            updateDataInternal('nmlsg.tec', 'total_excellent_count');
+            updateDataInternal('nmlsg.mcc', 'max_curve_count');
+            updateDataInternal('nmlsg.tcc', 'total_curve_count');
+
+            updateDataInternal('nmlsg.dbg', 'debug_flag');
+            updateDataInternal('nmlsg.fcr', 'force_critical');
+            updateDataInternal('nmlsg.fex', 'force_excellent');
+            updateDataInternal('nmlsg.fgr', 'force_great');
+            updateDataInternal('nmlsg.fen', 'fix_enemy_num');
+            updateDataInternal('nmlsg.fmn', 'fix_move_num');
+        }
+        function updateDataInternal(keyName, elemId) {
+            localStorage.setItem(keyName, document.getElementById(elemId).value);
+        }
+        function remove() {
+            localStorage.removeItem("trcng.tpc");
+
+            localStorage.removeItem("nmlsg.tpc");
+            localStorage.removeItem("nmlsg.msc");
+            localStorage.removeItem("nmlsg.tsc");
+            localStorage.removeItem("nmlsg.mst");
+            localStorage.removeItem("nmlsg.mgc");
+            localStorage.removeItem("nmlsg.tgc");
+            localStorage.removeItem("nmlsg.mec");
+            localStorage.removeItem("nmlsg.tec");
+            localStorage.removeItem("nmlsg.mcc");
+            localStorage.removeItem("nmlsg.tcc");
+
+            localStorage.removeItem("nmlsg.dbg");
+            localStorage.removeItem('nmlsg.fcr');
+            localStorage.removeItem('nmlsg.fex');
+            localStorage.removeItem('nmlsg.fgr');
+            localStorage.removeItem('nmlsg.fen');
+            localStorage.removeItem('nmlsg.fmn');
+
+            //            readData();
+        }
+    </script>
+</head>
+
+<body>
+    <!--
+    -->
+    <table>
+        <tr>
+            <td colspan="2">
+                <h2>[TARACHINE GO]</h2>
+            </td>
+        </tr>
+        <tr>
+            <td><label for="name">TARACHINE GOをプレイしたか</label></td>
+            <td>
+                <select id="trcng_play_count" onchange="update();" required>
+                    <option value="0">No</option>
+                    <option value="1">Yes</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <h2>[実績系]</h2>
+            </td>
+        </tr>
+        <tr>
+            <td><label for="name">累計プレイ回数（0〜100）</label></td>
+            <td><input type="number" id="total_play_count" min="0" max="999" onchange="update();" required></td>
+        </tr>
+        <tr>
+            <td colspan="2"><br></td>
+        </tr>
+        <tr>
+            <td><label for="name">最高スコア（0〜40000）</label></td>
+            <td><input type="number" id="max_score" min="0" max="99999" onchange="update();" required></td>
+        </tr>
+        <tr>
+            <td><label for="name">累計スコア（0〜200000）</label></td>
+            <td><input type="number" id="total_score" min="0" max="999999" onchange="update();" required></td>
+        </tr>
+        <tr>
+            <td colspan="2"><br></td>
+        </tr>
+        <tr>
+            <td><label for="name">最高ステージ数（1〜10）</label></td>
+            <td><input type="number" id="max_stage" min="1" max="10" maxlength="5" onchange="update();" required></td>
+        </tr>
+        <tr>
+            <td colspan="2"><br></td>
+        </tr>
+        <tr>
+            <td><label for="name">最高グレートスロー回数（0〜10）</label></td>
+            <td><input type="number" id="max_great_count" min="0" max="10" maxlength="5" onchange="update();" required>
+            </td>
+        </tr>
+        <tr>
+            <td><label for="name">累計グレートスロー回数（0〜200）</label></td>
+            <td><input type="number" id="total_great_count" min="0" max="999" onchange="update();" required></td>
+        </tr>
+        <tr>
+            <td colspan="2"><br></td>
+        </tr>
+        <tr>
+            <td><label for="name">最高エクセレントスロー回数（0〜10）</label></td>
+            <td><input type="number" id="max_excellent_count" min="0" max="10" maxlength="5" onchange="update();"
+                    required></td>
+        </tr>
+        <tr>
+            <td><label for="name">累計エクセレントスロー回数（0〜200）</label></td>
+            <td><input type="number" id="total_excellent_count" min="0" max="999" onchange="update();" required></td>
+        </tr>
+        <tr>
+            <td colspan="2"><br></td>
+        </tr>
+        <tr>
+            <td><label for="name">最高カーブスロー回数（0〜10）</label></td>
+            <td><input type="number" id="max_curve_count" min="0" max="10" maxlength="5" onchange="update();" required>
+            </td>
+        </tr>
+        <tr>
+            <td><label for="name">累計カーブスロー回数（0〜200）</label></td>
+            <td><input type="number" id="total_curve_count" min="0" max="999" onchange="update();" required></td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <h2>[デバッグ系]</h2>
+            </td>
+        </tr>
+        <tr>
+            <td><label for="name">デバッグモード</label></td>
+            <td>
+                <select id="debug_flag" onchange="update();" required>
+                    <option value="0">オフ</option>
+                    <option value="1">オン</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td><label for="name">必ずクリティカル</label></td>
+            <td>
+                <select id="force_critical" onchange="update();" required>
+                    <option value="0">No</option>
+                    <option value="1">Yes</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td><label for="name">必ずエクセレント</label></td>
+            <td>
+                <select id="force_excellent" onchange="update();" required>
+                    <option value="0">No</option>
+                    <option value="1">Yes</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td><label for="name">必ずグレート</label></td>
+            <td>
+                <select id="force_great" onchange="update();" required>
+                    <option value="0">No</option>
+                    <option value="1">Yes</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td><label for="name">敵キャラ固定</label></td>
+            <td>
+                <select id="fix_enemy_num" onchange="update();" required>
+                    <option value="-1">固定しない</option>
+                    <option value="0">レモン</option>
+                    <option value="1">メタルウィング</option>
+                    <option value="2">ネッシー</option>
+                    <option value="3">ウサギ</option>
+                    <option value="4">ホワイトチョコ</option>
+                    <option value="5">レジ</option>
+                    <option value="6">うてな</option>
+                    <option value="7">フェモ</option>
+                    <option value="8">にんじゃ</option>
+                    <option value="9">ヤドカリ</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td><label for="name">敵移動パターン固定</label></td>
+            <td>
+                <select id="fix_move_num" onchange="update();" required>
+                    <option value="-1">固定しない</option>
+                    <option value="0">１面</option>
+                    <option value="1">２面</option>
+                    <option value="2">３面</option>
+                    <option value="3">４面</option>
+                    <option value="4">５面</option>
+                    <option value="5">６面</option>
+                    <option value="6">７面</option>
+                    <option value="7">８面</option>
+                    <option value="8">９面</option>
+                    <option value="9">１０面</option>
+                </select>
+            </td>
+        </tr>
+    </table>
+    <form method="" action="" onsubmit="return remove()">
+        <p><input type="submit" value="初期化"></p>
+    </form>
+</body>
+
+</html>

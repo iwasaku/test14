@@ -7,21 +7,23 @@ const SCREEN_HEIGHT = 2340;              // スクリーン高さ
 const SCREEN_CENTER_X = SCREEN_WIDTH / 2;   // スクリーン幅の半分
 const SCREEN_CENTER_Y = SCREEN_HEIGHT / 2;  // スクリーン高さの半分
 
+const MAX_TOTAL_COUNT = 2100000000;  // 累積値の最大値（21億）
+
 const FONT_FAMILY = "'misaki_gothic','Meiryo',sans-serif";
 const ASSETS = {
     "tball": "./resource/tball.png?20230503",
     "field": "./resource/field_64.png",
 
-    "enemy0": "./resource/230630TG_test1.png",
-    "enemy1": "./resource/230630TG_test2.png",
-    "enemy2": "./resource/trcn01.png",
-    "enemy3": "./resource/trcn01.png",
-    "enemy4": "./resource/trcn01.png",
-    "enemy5": "./resource/trcn01.png",
-    "enemy6": "./resource/trcn01.png",
-    "enemy7": "./resource/trcn01.png",
-    "enemy8": "./resource/trcn01.png",
-    "enemy9": "./resource/trcn01.png",
+    "cash_register": "./resource/cashRegister.png",
+    "lemon": "./resource/lemon.png",
+    "metal_wing": "./resource/metalWing.png",
+    "nessie": "./resource/Nessie.png",
+    "rabbit": "./resource/Rabbit.png",
+    "ute_blue": "./resource/uteBlue.png",
+    "ute_femo": "./resource/uteFemo.png",
+    "ute_ninja": "./resource/uteNINJA.png",
+    "ute_yado": "./resource/uteYado.png",
+    "white_choco": "./resource/whiteChoco.png",
 };
 
 //出現時
@@ -486,44 +488,44 @@ const counterAtkTbl = [
 
 const ENEMY_DEF = defineEnum({
     ENEMY_0: {
-        name: "test1",
-        sprName: "enemy0",
+        name: "レモン",
+        sprName: "lemon",
     },
     ENEMY_1: {
-        name: "test2",
-        sprName: "enemy1",
+        name: "メタルウィング",
+        sprName: "metal_wing",
     },
     ENEMY_2: {
-        name: "nmls2",
-        sprName: "enemy2",
+        name: "ネッシー",
+        sprName: "nessie",
     },
     ENEMY_3: {
-        name: "nmls3",
-        sprName: "enemy3",
+        name: "ウサギ",
+        sprName: "rabbit",
     },
     ENEMY_4: {
-        name: "nmls4",
-        sprName: "enemy4",
+        name: "ホワイトチョコ",
+        sprName: "white_choco",
     },
     ENEMY_5: {
-        name: "nmls5",
-        sprName: "enemy5",
+        name: "レジ",
+        sprName: "cash_register",
     },
     ENEMY_6: {
-        name: "nmls6",
-        sprName: "enemy6",
+        name: "うてな",
+        sprName: "ute_blue",
     },
     ENEMY_7: {
-        name: "nmls7",
-        sprName: "enemy7",
+        name: "フェモ",
+        sprName: "ute_femo",
     },
     ENEMY_8: {
-        name: "nmls8",
-        sprName: "enemy8",
+        name: "にんじゃ",
+        sprName: "ute_ninja",
     },
     ENEMY_9: {
-        name: "nmls9",
-        sprName: "enemy9",
+        name: "ヤドカリ",
+        sprName: "ute_yado",
     },
 });
 const enemyTbl = [
@@ -567,16 +569,29 @@ let nowScore = 0;
 let scoreTimer = 0;
 let randomSeed = 3557;
 let randomMode = Boolean(1);
+
 let trophyArray = new Array();
 let trcngPlayCount = 0;
 let totalPlayCount = 0;
+let maxScore = 0;
 let totalScore = 0;
+let maxStage = 0;
+let maxGreatCount = 0;
 let totalGreatCount = 0;
+let maxExcellentCount = 0;
 let totalExcellentCount = 0;
+let maxCurveCount = 0;
 let totalCurveCount = 0;
 let tmpGreatCount = 0;
 let tmpExcellentCount = 0;
 let tmpCurveCount = 0;
+
+let dbgMode = 0;
+let dbgForceCritical = 0;
+let dbgForceExcellent = 0;
+let dbgForceGreat = 0;
+let dbgFixEnemyKind = -1;
+let dbgFixMoveKind = -1;
 
 tm.main(function () {
     // アプリケーションクラスを生成
@@ -718,41 +733,55 @@ tm.define("TitleScene", {
         // TARACHINE GOのプレイデータのLOAD
         {
             let tmp = null;
-            tmp = localStorage.getItem('trcng_tpc');
+            tmp = localStorage.getItem('trcng.tpc');
             trcngPlayCount = (tmp === null) ? 0 : parseInt(tmp);
-            trcngPlayCount = 1;                        // for debug
         }
         // プレイデータのLOAD
         {
-            let json = localStorage.getItem('nmlsg_trophy');
-            if (json === null) {
-                for (let ii = 0; ii < 100; ii++) {
-                    if (false) {
-                        trophyArray.push(0);
-                    } else {
-                        // for debug
-                        let tmp = (Math.random() < 0.5) ? 0 : 1;
-                        tmp = 1;
-                        trophyArray.push(tmp);
-                    }
-                }
-            } else {
-                trophyArray = JSON.parse(json);
-            }
             let tmp = null;
-            tmp = localStorage.getItem('nmlsg_tpc');
+            tmp = localStorage.getItem('nmlsg.tpc');
             totalPlayCount = (tmp === null) ? 0 : parseInt(tmp);
-            tmp = localStorage.getItem('nmlsg_tsc');
+
+            tmp = localStorage.getItem('nmlsg.msc');
+            maxScore = (tmp === null) ? 0 : parseInt(tmp);
+            tmp = localStorage.getItem('nmlsg.tsc');
             totalScore = (tmp === null) ? 0 : parseInt(tmp);
-            tmp = localStorage.getItem('nmlsg_tgc');
+
+            tmp = localStorage.getItem('nmlsg.mst');
+            maxStage = (tmp === null) ? 0 : parseInt(tmp);
+
+            tmp = localStorage.getItem('nmlsg.mgc');
+            maxGreatCount = (tmp === null) ? 0 : parseInt(tmp);
+            tmp = localStorage.getItem('nmlsg.tgc');
             totalGreatCount = (tmp === null) ? 0 : parseInt(tmp);
-            tmp = localStorage.getItem('nmlsg_tec');
+
+            tmp = localStorage.getItem('nmlsg.mec');
+            maxExcellentCount = (tmp === null) ? 0 : parseInt(tmp);
+            tmp = localStorage.getItem('nmlsg.tec');
             totalExcellentCount = (tmp === null) ? 0 : parseInt(tmp);
-            tmp = localStorage.getItem('nmlsg_tcc');
+
+            tmp = localStorage.getItem('nmlsg.mcc');
+            maxCurveCount = (tmp === null) ? 0 : parseInt(tmp);
+            tmp = localStorage.getItem('nmlsg.tcc');
             totalCurveCount = (tmp === null) ? 0 : parseInt(tmp);
+
+            tmp = localStorage.getItem('nmlsg.dbg');
+            dbgMode = (tmp === null) ? 0 : parseInt(tmp);
+            tmp = localStorage.getItem('nmlsg.fcr');
+            dbgForceCritical = (tmp === null) ? 0 : parseInt(tmp);
+            tmp = localStorage.getItem('nmlsg.fex');
+            dbgForceExcellent = (tmp === null) ? 0 : parseInt(tmp);
+            tmp = localStorage.getItem('nmlsg.fgr');
+            dbgForceGreat = (tmp === null) ? 0 : parseInt(tmp);
+            tmp = localStorage.getItem('nmlsg.fen');
+            dbgFixEnemyKind = (tmp === null) ? -1 : parseInt(tmp);
+            tmp = localStorage.getItem('nmlsg.fmn');
+            dbgFixMoveKind = (tmp === null) ? -1 : parseInt(tmp);
         }
         // トロフィー表示データ
         {
+            makeTrophyArray();
+
             let tmpTrophy = "";
             let ii = 0;
             for (let jj = 0; jj < 10; jj++) {
@@ -847,7 +876,7 @@ tm.define("GameScene", {
         this.bgField = tm.display.Sprite("field", SCREEN_WIDTH, SCREEN_HEIGHT).addChildTo(group0);
         this.bgField.setPosition(SCREEN_CENTER_X, SCREEN_CENTER_Y);
 
-        trcn = new Trcn("enemy0").addChildTo(group1);
+        trcn = new Trcn("cash_register").addChildTo(group1);
         tgtRingW = new TargetRing("#ffffff", 1).addChildTo(group2);
         tgtRingG = new TargetRing("#00ff00", 0).addChildTo(group2);
         tgtRingY = new TargetRing("#ffff00", 0).addChildTo(group2);
@@ -1048,6 +1077,9 @@ tm.define("GameScene", {
             // THROUGH
             case GAME_MODE.APPEAR_INIT:
                 enemyDef = enemyTbl[trophyLv][trcnNum];
+                if (dbgMode === 1) {
+                    if (dbgFixEnemyKind != -1) enemyDef = enemyTbl[9][dbgFixEnemyKind];
+                }
                 trcn.remove();
                 trcn = new Trcn(enemyDef.sprName).addChildTo(group1);
                 appearSE.play();
@@ -1056,6 +1088,9 @@ tm.define("GameScene", {
                 trcn.setScale(1, 1);
                 trcn.theta = startThetaTbl[trcnNum];
                 trcn.atkTimer = myRandom2(atkTbl[trcnNum].min, atkTbl[trcnNum].max);
+                if (dbgMode === 1) {
+                    trcn.atkTimer = 99 * FPS;
+                }
 
                 appearTimer = 1 * FPS;
                 this.appearLabel.text = "あ！やせいの" + enemyDef.name + "が\nとびだしてきた";
@@ -1675,6 +1710,25 @@ tm.define("TBall", {
                             this.point *= 2.0;
                             this.hitType = HIT_TYPE.NICE;
                         }
+                        if (dbgMode === 1) {
+                            if (dbgForceCritical === 1) {
+                                correctRatio = 10000;
+                                this.point *= 1.0;
+                                this.hitType = HIT_TYPE.CRITICAL;
+                            } else if (dbgForceExcellent === 1) {
+                                correctRatio = 10000;
+                                this.point *= 1.0;
+                                this.hitType = HIT_TYPE.EXCELLENT;
+                            } else if (dbgForceGreat === 1) {
+                                correctRatio = 10000;
+                                this.point *= 1.0;
+                                this.hitType = HIT_TYPE.GREAT;
+                            } else {
+                                correctRatio = 10000;
+                                this.point *= 1.0;
+                                this.hitType = HIT_TYPE.NICE;
+                            }
+                        }
                     } else {
                         // 着弾点がターゲットリングの外側
                         correctRatio = 1.0;
@@ -1686,7 +1740,7 @@ tm.define("TBall", {
                     }
 
                     let getRandom = myRandom(1, 100);
-                    getRandom = 0;  // for debug
+                    if (dbgMode === 1) getRandom = 0;
                     if (getRandom <= basicRatio * getRatio * correctRatio * curveRatio) {
                         this.isGet = Boolean(1);
                     } else {
@@ -1860,7 +1914,9 @@ tm.define("Trcn", {
                     break;
                 }
                 let tmpTrcnNum = trcnNum;
-                //                tmpTrcnNum = 0; // for debug
+                if (dbgMode === 1) {
+                    if (dbgFixMoveKind != -1) tmpTrcnNum = dbgFixMoveKind;
+                }
                 switch (tmpTrcnNum) {
                     case 0:
                         // 固定
@@ -1990,12 +2046,14 @@ function calcDistVec(aVec, bVec) {
 }
 
 // 実績チェック＆Save
-function checkAndSaveTrophy(tmpScore, tmpStage, tmpGreatCount, tmpExcellentCount, tmpCurveCount) {
+function makeTrophyArray() {
     // TARACHINE GOを１回もプレイしていない時は実績チェックをしない
     if (trcngPlayCount < 1) return;
 
+    // 一旦初期化
+    trophyArray = new Array();
+
     // 累計プレイ回数
-    totalPlayCount++;
     if (totalPlayCount >= 10) trophyArray[0] = 1;
     if (totalPlayCount >= 20) trophyArray[1] = 1;
     if (totalPlayCount >= 30) trophyArray[2] = 1;
@@ -2008,79 +2066,76 @@ function checkAndSaveTrophy(tmpScore, tmpStage, tmpGreatCount, tmpExcellentCount
     if (totalPlayCount >= 100) trophyArray[9] = 1;
 
     // 今回の得点
-    if (tmpScore >= 20000) trophyArray[10] = 1;
-    if (tmpScore >= 40000) trophyArray[11] = 1;
-    if (tmpScore >= 60000) trophyArray[12] = 1;
-    if (tmpScore >= 80000) trophyArray[13] = 1;
-    if (tmpScore >= 100000) trophyArray[14] = 1;
-    if (tmpScore >= 120000) trophyArray[15] = 1;
-    if (tmpScore >= 140000) trophyArray[16] = 1;
-    if (tmpScore >= 160000) trophyArray[17] = 1;
-    if (tmpScore >= 180000) trophyArray[18] = 1;
-    if (tmpScore >= 200000) trophyArray[19] = 1;
+    if (maxScore >= 4000) trophyArray[10] = 1;
+    if (maxScore >= 8000) trophyArray[11] = 1;
+    if (maxScore >= 12000) trophyArray[12] = 1;
+    if (maxScore >= 16000) trophyArray[13] = 1;
+    if (maxScore >= 20000) trophyArray[14] = 1;
+    if (maxScore >= 24000) trophyArray[15] = 1;
+    if (maxScore >= 28000) trophyArray[16] = 1;
+    if (maxScore >= 32000) trophyArray[17] = 1;
+    if (maxScore >= 36000) trophyArray[18] = 1;
+    if (maxScore >= 40000) trophyArray[19] = 1;
 
     // 累計の得点
-    totalScore += tmpScore;
-    if (totalScore >= 200000) trophyArray[20] = 1;
-    if (totalScore >= 400000) trophyArray[21] = 1;
-    if (totalScore >= 600000) trophyArray[22] = 1;
-    if (totalScore >= 800000) trophyArray[23] = 1;
-    if (totalScore >= 1000000) trophyArray[24] = 1;
-    if (totalScore >= 1200000) trophyArray[25] = 1;
-    if (totalScore >= 1400000) trophyArray[26] = 1;
-    if (totalScore >= 1600000) trophyArray[27] = 1;
-    if (totalScore >= 1800000) trophyArray[28] = 1;
-    if (totalScore >= 2000000) trophyArray[29] = 1;
+    if (totalScore >= 20000) trophyArray[20] = 1;
+    if (totalScore >= 40000) trophyArray[21] = 1;
+    if (totalScore >= 60000) trophyArray[22] = 1;
+    if (totalScore >= 80000) trophyArray[23] = 1;
+    if (totalScore >= 100000) trophyArray[24] = 1;
+    if (totalScore >= 120000) trophyArray[25] = 1;
+    if (totalScore >= 140000) trophyArray[26] = 1;
+    if (totalScore >= 160000) trophyArray[27] = 1;
+    if (totalScore >= 180000) trophyArray[28] = 1;
+    if (totalScore >= 200000) trophyArray[29] = 1;
 
     // 今回の最終プレイ面数（クリアした面では無い）
-    if (tmpStage >= 1) trophyArray[30] = 1;
-    if (tmpStage >= 2) trophyArray[31] = 1;
-    if (tmpStage >= 3) trophyArray[32] = 1;
-    if (tmpStage >= 4) trophyArray[33] = 1;
-    if (tmpStage >= 5) trophyArray[34] = 1;
-    if (tmpStage >= 6) trophyArray[35] = 1;
-    if (tmpStage >= 7) trophyArray[36] = 1;
-    if (tmpStage >= 8) trophyArray[37] = 1;
-    if (tmpStage >= 9) trophyArray[38] = 1;
-    if (tmpStage >= 10) trophyArray[39] = 1;
+    if (maxStage >= 1) trophyArray[30] = 1;
+    if (maxStage >= 2) trophyArray[31] = 1;
+    if (maxStage >= 3) trophyArray[32] = 1;
+    if (maxStage >= 4) trophyArray[33] = 1;
+    if (maxStage >= 5) trophyArray[34] = 1;
+    if (maxStage >= 6) trophyArray[35] = 1;
+    if (maxStage >= 7) trophyArray[36] = 1;
+    if (maxStage >= 8) trophyArray[37] = 1;
+    if (maxStage >= 9) trophyArray[38] = 1;
+    if (maxStage >= 10) trophyArray[39] = 1;
 
     // 今回のGreat or Excellentの回数
-    if (tmpGreatCount >= 1) trophyArray[40] = 1;
-    if (tmpGreatCount >= 2) trophyArray[41] = 1;
-    if (tmpGreatCount >= 3) trophyArray[42] = 1;
-    if (tmpGreatCount >= 4) trophyArray[43] = 1;
-    if (tmpGreatCount >= 5) trophyArray[44] = 1;
-    if (tmpGreatCount >= 6) trophyArray[45] = 1;
-    if (tmpGreatCount >= 7) trophyArray[46] = 1;
-    if (tmpGreatCount >= 8) trophyArray[47] = 1;
-    if (tmpGreatCount >= 9) trophyArray[48] = 1;
-    if (tmpGreatCount >= 10) trophyArray[49] = 1;
+    if (maxGreatCount >= 1) trophyArray[40] = 1;
+    if (maxGreatCount >= 2) trophyArray[41] = 1;
+    if (maxGreatCount >= 3) trophyArray[42] = 1;
+    if (maxGreatCount >= 4) trophyArray[43] = 1;
+    if (maxGreatCount >= 5) trophyArray[44] = 1;
+    if (maxGreatCount >= 6) trophyArray[45] = 1;
+    if (maxGreatCount >= 7) trophyArray[46] = 1;
+    if (maxGreatCount >= 8) trophyArray[47] = 1;
+    if (maxGreatCount >= 9) trophyArray[48] = 1;
+    if (maxGreatCount >= 10) trophyArray[49] = 1;
     // 累計のGreat or Excellentの回数
-    totalGreatCount += tmpGreatCount;
-    if (tmpGreatCount >= 20) trophyArray[50] = 1;
-    if (tmpGreatCount >= 40) trophyArray[51] = 1;
-    if (tmpGreatCount >= 60) trophyArray[52] = 1;
-    if (tmpGreatCount >= 80) trophyArray[53] = 1;
-    if (tmpGreatCount >= 100) trophyArray[54] = 1;
-    if (tmpGreatCount >= 120) trophyArray[55] = 1;
-    if (tmpGreatCount >= 140) trophyArray[56] = 1;
-    if (tmpGreatCount >= 160) trophyArray[57] = 1;
-    if (tmpGreatCount >= 180) trophyArray[58] = 1;
-    if (tmpGreatCount >= 200) trophyArray[59] = 1;
+    if (totalGreatCount >= 20) trophyArray[50] = 1;
+    if (totalGreatCount >= 40) trophyArray[51] = 1;
+    if (totalGreatCount >= 60) trophyArray[52] = 1;
+    if (totalGreatCount >= 80) trophyArray[53] = 1;
+    if (totalGreatCount >= 100) trophyArray[54] = 1;
+    if (totalGreatCount >= 120) trophyArray[55] = 1;
+    if (totalGreatCount >= 140) trophyArray[56] = 1;
+    if (totalGreatCount >= 160) trophyArray[57] = 1;
+    if (totalGreatCount >= 180) trophyArray[58] = 1;
+    if (totalGreatCount >= 200) trophyArray[59] = 1;
 
     // 今回のExcellentの回数
-    if (tmpExcellentCount >= 1) trophyArray[60] = 1;
-    if (tmpExcellentCount >= 2) trophyArray[61] = 1;
-    if (tmpExcellentCount >= 3) trophyArray[62] = 1;
-    if (tmpExcellentCount >= 4) trophyArray[63] = 1;
-    if (tmpExcellentCount >= 5) trophyArray[64] = 1;
-    if (tmpExcellentCount >= 6) trophyArray[65] = 1;
-    if (tmpExcellentCount >= 7) trophyArray[66] = 1;
-    if (tmpExcellentCount >= 8) trophyArray[67] = 1;
-    if (tmpExcellentCount >= 9) trophyArray[68] = 1;
-    if (tmpExcellentCount >= 10) trophyArray[69] = 1;
+    if (maxExcellentCount >= 1) trophyArray[60] = 1;
+    if (maxExcellentCount >= 2) trophyArray[61] = 1;
+    if (maxExcellentCount >= 3) trophyArray[62] = 1;
+    if (maxExcellentCount >= 4) trophyArray[63] = 1;
+    if (maxExcellentCount >= 5) trophyArray[64] = 1;
+    if (maxExcellentCount >= 6) trophyArray[65] = 1;
+    if (maxExcellentCount >= 7) trophyArray[66] = 1;
+    if (maxExcellentCount >= 8) trophyArray[67] = 1;
+    if (maxExcellentCount >= 9) trophyArray[68] = 1;
+    if (maxExcellentCount >= 10) trophyArray[69] = 1;
     // 累計のExcellentの回数
-    totalExcellentCount += tmpExcellentCount;
     if (totalExcellentCount >= 20) trophyArray[70] = 1;
     if (totalExcellentCount >= 40) trophyArray[71] = 1;
     if (totalExcellentCount >= 60) trophyArray[72] = 1;
@@ -2093,18 +2148,17 @@ function checkAndSaveTrophy(tmpScore, tmpStage, tmpGreatCount, tmpExcellentCount
     if (totalExcellentCount >= 200) trophyArray[79] = 1;
 
     // 今回のカーブボールの回数
-    if (tmpCurveCount >= 1) trophyArray[80] = 1;
-    if (tmpCurveCount >= 2) trophyArray[81] = 1;
-    if (tmpCurveCount >= 3) trophyArray[82] = 1;
-    if (tmpCurveCount >= 4) trophyArray[83] = 1;
-    if (tmpCurveCount >= 5) trophyArray[84] = 1;
-    if (tmpCurveCount >= 6) trophyArray[85] = 1;
-    if (tmpCurveCount >= 7) trophyArray[86] = 1;
-    if (tmpCurveCount >= 8) trophyArray[87] = 1;
-    if (tmpCurveCount >= 9) trophyArray[88] = 1;
-    if (tmpCurveCount >= 10) trophyArray[89] = 1;
+    if (maxCurveCount >= 1) trophyArray[80] = 1;
+    if (maxCurveCount >= 2) trophyArray[81] = 1;
+    if (maxCurveCount >= 3) trophyArray[82] = 1;
+    if (maxCurveCount >= 4) trophyArray[83] = 1;
+    if (maxCurveCount >= 5) trophyArray[84] = 1;
+    if (maxCurveCount >= 6) trophyArray[85] = 1;
+    if (maxCurveCount >= 7) trophyArray[86] = 1;
+    if (maxCurveCount >= 8) trophyArray[87] = 1;
+    if (maxCurveCount >= 9) trophyArray[88] = 1;
+    if (maxCurveCount >= 10) trophyArray[89] = 1;
     // 累計のカーブボールの回数
-    totalCurveCount += tmpCurveCount;
     if (totalCurveCount >= 20) trophyArray[90] = 1;
     if (totalCurveCount >= 40) trophyArray[91] = 1;
     if (totalCurveCount >= 60) trophyArray[92] = 1;
@@ -2119,23 +2173,71 @@ function checkAndSaveTrophy(tmpScore, tmpStage, tmpGreatCount, tmpExcellentCount
     // デバッグ表示
     console.log("trophyArray:" + trophyArray);
     console.log("totalPlayCount:" + totalPlayCount);
+    console.log("maxScore:" + maxScore);
     console.log("totalScore:" + totalScore);
+    console.log("maxStage:" + maxStage);
+    console.log("maxGreatCount:" + maxGreatCount);
     console.log("totalGreatCount:" + totalGreatCount);
+    console.log("maxExcellentCount" + maxExcellentCount);
     console.log("totalExcellentCount" + totalExcellentCount);
+    console.log("maxCurveCount:" + maxCurveCount);
     console.log("totalCurveCount:" + totalCurveCount);
-    console.log("tmpScore:" + tmpScore);
-    console.log("tmpStage:" + tmpStage);
-    console.log("tmpGreatCount" + tmpGreatCount);
-    console.log("tmpExcellentCount:" + tmpExcellentCount);
-    console.log("tmpCurveCount:" + tmpCurveCount);
+}
+function checkAndSaveTrophy(tmpScore, tmpStage, tmpGreatCount, tmpExcellentCount, tmpCurveCount) {
+    // TARACHINE GOを１回もプレイしていない時は実績チェックをしない
+    if (trcngPlayCount < 1) return;
+
+    // 累計プレイ回数
+    totalPlayCount++;
+    if (totalPlayCount > MAX_TOTAL_COUNT) totalPlayCount = MAX_TOTAL_COUNT;
+
+    // 今回の得点
+    // 前回値よりも大きければ更新
+    if (maxScore < tmpScore) maxScore = tmpScore
+
+    // 累計の得点
+    totalScore += tmpScore;
+    if (totalScore > MAX_TOTAL_COUNT) totalScore = MAX_TOTAL_COUNT;
+
+    // 今回の最終プレイ面数（クリアした面では無い）
+    // 前回値よりも大きければ更新
+    if (maxStage < tmpStage) maxStage = tmpStage;
+
+    // 今回のGreat or Excellentの回数
+    // 前回値よりも大きければ更新
+    if (maxGreatCount < tmpGreatCount) maxGreatCount = tmpGreatCount;
+    // 累計のGreat or Excellentの回数
+    totalGreatCount += tmpGreatCount;
+    if (totalGreatCount > MAX_TOTAL_COUNT) totalGreatCount = MAX_TOTAL_COUNT;
+
+    // 今回のExcellentの回数
+    // 前回値よりも大きければ更新
+    if (maxExcellentCount < tmpExcellentCount) maxExcellentCount = tmpExcellentCount;
+    // 累計のExcellentの回数
+    totalExcellentCount += tmpExcellentCount;
+    if (totalExcellentCount > MAX_TOTAL_COUNT) totalExcellentCount = MAX_TOTAL_COUNT;
+
+    // 今回のカーブボールの回数
+    // 前回値よりも大きければ更新
+    if (maxCurveCount < tmpCurveCount) maxCurveCount = tmpCurveCount;
+    // 累計のカーブボールの回数
+    totalCurveCount += tmpCurveCount;
+    if (totalCurveCount > MAX_TOTAL_COUNT) totalCurveCount = MAX_TOTAL_COUNT;
+
+    // 実績解放
+    makeTrophyArray();
 
     // 進捗の保存
-    //    localStorage.setItem('nmlsg_trophy', trophyArray);
-    //    localStorage.setItem('nmlsg_tpc', totalPlayCount);
-    //    localStorage.setItem('nmlsg_tsc', totalScore);
-    //    localStorage.setItem('nmlsg_tgc', totalGreatCount);
-    //    localStorage.setItem('nmlsg_tec', totalExcellentCount);
-    //    localStorage.setItem('nmlsg_tcc', totalCurveCount);
+    localStorage.setItem('nmlsg.tpc', totalPlayCount);
+    localStorage.setItem('nmlsg.msc', maxScore);
+    localStorage.setItem('nmlsg.tsc', totalScore);
+    localStorage.setItem('nmlsg.mst', maxStage);
+    localStorage.setItem('nmlsg.mgc', maxGreatCount);
+    localStorage.setItem('nmlsg.tgc', totalGreatCount);
+    localStorage.setItem('nmlsg.mec', maxExcellentCount);
+    localStorage.setItem('nmlsg.tec', totalExcellentCount);
+    localStorage.setItem('nmlsg.mcc', maxCurveCount);
+    localStorage.setItem('nmlsg.tcc', totalCurveCount);
 }
 
 function calcTrophyNum() {
