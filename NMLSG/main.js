@@ -741,7 +741,7 @@ tm.define("TitleScene", {
                         {
                             text: "＠57pool",
                             fontFamily: FONT_FAMILY,
-                            fontSize: 96,
+                            fontSize: 64,
                             bgColor: "hsl(0, 0%, 0%)",
                         }
                     ],
