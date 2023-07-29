@@ -725,6 +725,29 @@ tm.define("TitleScene", {
                     x: SCREEN_CENTER_X,
                     y: SCREEN_CENTER_Y + SCREEN_CENTER_Y / 2 + 64,
                 },
+                {
+                    type: "Label", name: "cdByLabel",
+                    x: SCREEN_CENTER_X,
+                    y: SCREEN_CENTER_Y + SCREEN_CENTER_Y / 2 + 64 + 32 + 128,
+                    fillStyle: "#fff",
+                    fontSize: 64,
+                    fontFamily: FONT_FAMILY,
+                    text: "Character Design\nby",
+                    align: "center",
+                },
+                {
+                    type: "FlatButton", name: "knpButton",
+                    init: [
+                        {
+                            text: "＠57pool",
+                            fontFamily: FONT_FAMILY,
+                            fontSize: 96,
+                            bgColor: "hsl(0, 0%, 0%)",
+                        }
+                    ],
+                    x: SCREEN_CENTER_X,
+                    y: SCREEN_CENTER_Y + SCREEN_CENTER_Y / 2 + 64 + 32 + 128 + 128 + 64,
+                },
             ]
         });
 
@@ -804,7 +827,9 @@ tm.define("TitleScene", {
                 this.trophyLabel.alpha = 0.0;
             }
         }
-        var self = this;
+        this.knpButton.onpointingstart = function () {
+            window.open('https://twitter.com/9seigun');
+        }; var self = this;
         this.startButton.onpointingstart = function () {
             self.app.replaceScene(GameScene());
         };
