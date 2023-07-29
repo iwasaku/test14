@@ -828,8 +828,12 @@ tm.define("TitleScene", {
             }
         }
         this.knpButton.onpointingstart = function () {
-            window.open('https://twitter.com/9seigun');
-        }; var self = this;
+            var url = "https://twitter.com/9seigun";
+            if (!window.open(url)) {
+                location.href = url;
+            }
+        };
+        var self = this;
         this.startButton.onpointingstart = function () {
             self.app.replaceScene(GameScene());
         };
