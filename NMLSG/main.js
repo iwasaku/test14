@@ -827,11 +827,8 @@ tm.define("TitleScene", {
                 this.trophyLabel.alpha = 0.0;
             }
         }
-        this.knpButton.onpointingstart = function () {
-            var url = "https://twitter.com/9seigun";
-            if (!window.open(url)) {
-                location.href = url;
-            }
+        this.knpButton.onclick = function () {
+            window.open("https://twitter.com/9seigun");
         };
         var self = this;
         this.startButton.onpointingstart = function () {
