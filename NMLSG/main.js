@@ -2280,14 +2280,14 @@ function calcTrophyNum() {
 
 function calcTrophyLv() {
     let num = calcTrophyNum();
-    if (num >= 95) return 9;
-    if (num >= 79) return 8;
-    if (num >= 64) return 7;
-    if (num >= 51) return 6;
-    if (num >= 40) return 5;
-    if (num >= 30) return 4;
-    if (num >= 21) return 3;
-    if (num >= 13) return 2;
-    if (num >= 6) return 1;
+    if (num >= 80) return 9;
+    if (num >= 63) return 8;
+    if (num >= 48) return 7;
+    if (num >= 35) return 6;
+    if (num >= 24) return 5;
+    if (num >= 15) return 4;
+    if (num >= 8) return 3;
+    if (num >= 3) return 2;
+    if (num >= 1) return 1;
     if (num >= 0) return 0;
 }
