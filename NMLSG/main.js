@@ -2092,28 +2092,28 @@ function makeTrophyArray() {
     if (totalPlayCount >= 100) trophyArray[9] = 1;
 
     // ハイスコア
-    if (maxScore >= 4000) trophyArray[10] = 1;
-    if (maxScore >= 8000) trophyArray[11] = 1;
-    if (maxScore >= 12000) trophyArray[12] = 1;
-    if (maxScore >= 16000) trophyArray[13] = 1;
-    if (maxScore >= 20000) trophyArray[14] = 1;
-    if (maxScore >= 24000) trophyArray[15] = 1;
-    if (maxScore >= 28000) trophyArray[16] = 1;
-    if (maxScore >= 32000) trophyArray[17] = 1;
-    if (maxScore >= 36000) trophyArray[18] = 1;
-    if (maxScore >= 40000) trophyArray[19] = 1;
+    if (totalPlayCount >= 1000) trophyArray[10] = 1;
+    if (totalPlayCount >= 4000) trophyArray[11] = 1;
+    if (totalPlayCount >= 9000) trophyArray[12] = 1;
+    if (totalPlayCount >= 16000) trophyArray[13] = 1;
+    if (totalPlayCount >= 25000) trophyArray[14] = 1;
+    if (totalPlayCount >= 36000) trophyArray[15] = 1;
+    if (totalPlayCount >= 49000) trophyArray[16] = 1;
+    if (totalPlayCount >= 64000) trophyArray[17] = 1;
+    if (totalPlayCount >= 81000) trophyArray[18] = 1;
+    if (totalPlayCount >= 100000) trophyArray[19] = 1;
 
     // 累計の得点
-    if (totalScore >= 20000) trophyArray[20] = 1;
-    if (totalScore >= 40000) trophyArray[21] = 1;
-    if (totalScore >= 60000) trophyArray[22] = 1;
-    if (totalScore >= 80000) trophyArray[23] = 1;
-    if (totalScore >= 100000) trophyArray[24] = 1;
-    if (totalScore >= 120000) trophyArray[25] = 1;
-    if (totalScore >= 140000) trophyArray[26] = 1;
-    if (totalScore >= 160000) trophyArray[27] = 1;
-    if (totalScore >= 180000) trophyArray[28] = 1;
-    if (totalScore >= 200000) trophyArray[29] = 1;
+    if (totalPlayCount >= 20000) trophyArray[20] = 1;
+    if (totalPlayCount >= 80000) trophyArray[21] = 1;
+    if (totalPlayCount >= 180000) trophyArray[22] = 1;
+    if (totalPlayCount >= 320000) trophyArray[23] = 1;
+    if (totalPlayCount >= 500000) trophyArray[24] = 1;
+    if (totalPlayCount >= 720000) trophyArray[25] = 1;
+    if (totalPlayCount >= 980000) trophyArray[26] = 1;
+    if (totalPlayCount >= 1280000) trophyArray[27] = 1;
+    if (totalPlayCount >= 1620000) trophyArray[28] = 1;
+    if (totalPlayCount >= 2000000) trophyArray[29] = 1;
 
     // 最高プレイ面数（クリアした面では無い）
     if (maxStage >= 1) trophyArray[30] = 1;
@@ -2139,16 +2139,16 @@ function makeTrophyArray() {
     if (maxGreatCount >= 9) trophyArray[48] = 1;
     if (maxGreatCount >= 10) trophyArray[49] = 1;
     // 累計のGreat or Excellentの回数
-    if (totalGreatCount >= 20) trophyArray[50] = 1;
-    if (totalGreatCount >= 40) trophyArray[51] = 1;
-    if (totalGreatCount >= 60) trophyArray[52] = 1;
-    if (totalGreatCount >= 80) trophyArray[53] = 1;
-    if (totalGreatCount >= 100) trophyArray[54] = 1;
-    if (totalGreatCount >= 120) trophyArray[55] = 1;
-    if (totalGreatCount >= 140) trophyArray[56] = 1;
-    if (totalGreatCount >= 160) trophyArray[57] = 1;
-    if (totalGreatCount >= 180) trophyArray[58] = 1;
-    if (totalGreatCount >= 200) trophyArray[59] = 1;
+    if (totalCurveCount >= 2) trophyArray[50] = 1;
+    if (totalCurveCount >= 8) trophyArray[51] = 1;
+    if (totalCurveCount >= 18) trophyArray[52] = 1;
+    if (totalCurveCount >= 32) trophyArray[53] = 1;
+    if (totalCurveCount >= 50) trophyArray[54] = 1;
+    if (totalCurveCount >= 72) trophyArray[55] = 1;
+    if (totalCurveCount >= 98) trophyArray[56] = 1;
+    if (totalCurveCount >= 128) trophyArray[57] = 1;
+    if (totalCurveCount >= 162) trophyArray[58] = 1;
+    if (totalCurveCount >= 200) trophyArray[59] = 1;
 
     // Excellentの最高回数
     if (maxExcellentCount >= 1) trophyArray[60] = 1;
@@ -2162,16 +2162,16 @@ function makeTrophyArray() {
     if (maxExcellentCount >= 9) trophyArray[68] = 1;
     if (maxExcellentCount >= 10) trophyArray[69] = 1;
     // 累計のExcellentの回数
-    if (totalExcellentCount >= 20) trophyArray[70] = 1;
-    if (totalExcellentCount >= 40) trophyArray[71] = 1;
-    if (totalExcellentCount >= 60) trophyArray[72] = 1;
-    if (totalExcellentCount >= 80) trophyArray[73] = 1;
-    if (totalExcellentCount >= 100) trophyArray[74] = 1;
-    if (totalExcellentCount >= 120) trophyArray[75] = 1;
-    if (totalExcellentCount >= 140) trophyArray[76] = 1;
-    if (totalExcellentCount >= 160) trophyArray[77] = 1;
-    if (totalExcellentCount >= 180) trophyArray[78] = 1;
-    if (totalExcellentCount >= 200) trophyArray[79] = 1;
+    if (totalCurveCount >= 2) trophyArray[70] = 1;
+    if (totalCurveCount >= 8) trophyArray[71] = 1;
+    if (totalCurveCount >= 18) trophyArray[72] = 1;
+    if (totalCurveCount >= 32) trophyArray[73] = 1;
+    if (totalCurveCount >= 50) trophyArray[74] = 1;
+    if (totalCurveCount >= 72) trophyArray[75] = 1;
+    if (totalCurveCount >= 98) trophyArray[76] = 1;
+    if (totalCurveCount >= 128) trophyArray[77] = 1;
+    if (totalCurveCount >= 162) trophyArray[78] = 1;
+    if (totalCurveCount >= 200) trophyArray[79] = 1;
 
     // カーブボールの最高回数
     if (maxCurveCount >= 1) trophyArray[80] = 1;
@@ -2185,15 +2185,15 @@ function makeTrophyArray() {
     if (maxCurveCount >= 9) trophyArray[88] = 1;
     if (maxCurveCount >= 10) trophyArray[89] = 1;
     // 累計のカーブボールの回数
-    if (totalCurveCount >= 20) trophyArray[90] = 1;
-    if (totalCurveCount >= 40) trophyArray[91] = 1;
-    if (totalCurveCount >= 60) trophyArray[92] = 1;
-    if (totalCurveCount >= 80) trophyArray[93] = 1;
-    if (totalCurveCount >= 100) trophyArray[94] = 1;
-    if (totalCurveCount >= 120) trophyArray[95] = 1;
-    if (totalCurveCount >= 140) trophyArray[96] = 1;
-    if (totalCurveCount >= 160) trophyArray[97] = 1;
-    if (totalCurveCount >= 180) trophyArray[98] = 1;
+    if (totalCurveCount >= 2) trophyArray[90] = 1;
+    if (totalCurveCount >= 8) trophyArray[91] = 1;
+    if (totalCurveCount >= 18) trophyArray[92] = 1;
+    if (totalCurveCount >= 32) trophyArray[93] = 1;
+    if (totalCurveCount >= 50) trophyArray[94] = 1;
+    if (totalCurveCount >= 72) trophyArray[95] = 1;
+    if (totalCurveCount >= 98) trophyArray[96] = 1;
+    if (totalCurveCount >= 128) trophyArray[97] = 1;
+    if (totalCurveCount >= 162) trophyArray[98] = 1;
     if (totalCurveCount >= 200) trophyArray[99] = 1;
 
     // デバッグ表示
