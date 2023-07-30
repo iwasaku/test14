@@ -2080,15 +2080,15 @@ function makeTrophyArray() {
     trophyArray = new Array();
 
     // 累計プレイ回数
-    if (totalPlayCount >= 10) trophyArray[0] = 1;
-    if (totalPlayCount >= 20) trophyArray[1] = 1;
-    if (totalPlayCount >= 30) trophyArray[2] = 1;
-    if (totalPlayCount >= 40) trophyArray[3] = 1;
-    if (totalPlayCount >= 50) trophyArray[4] = 1;
-    if (totalPlayCount >= 60) trophyArray[5] = 1;
-    if (totalPlayCount >= 70) trophyArray[6] = 1;
-    if (totalPlayCount >= 80) trophyArray[7] = 1;
-    if (totalPlayCount >= 90) trophyArray[8] = 1;
+    if (totalPlayCount >= 1) trophyArray[0] = 1;
+    if (totalPlayCount >= 4) trophyArray[1] = 1;
+    if (totalPlayCount >= 9) trophyArray[2] = 1;
+    if (totalPlayCount >= 16) trophyArray[3] = 1;
+    if (totalPlayCount >= 25) trophyArray[4] = 1;
+    if (totalPlayCount >= 36) trophyArray[5] = 1;
+    if (totalPlayCount >= 49) trophyArray[6] = 1;
+    if (totalPlayCount >= 64) trophyArray[7] = 1;
+    if (totalPlayCount >= 81) trophyArray[8] = 1;
     if (totalPlayCount >= 100) trophyArray[9] = 1;
 
     // ハイスコア
