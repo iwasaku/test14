@@ -501,6 +501,7 @@ let nowScore = 0;
 let scoreTimer = 0;
 let randomSeed = 3557;
 let randomMode = Boolean(1);
+let totalPlayCount = 0;
 
 
 tm.main(function () {
@@ -598,6 +599,8 @@ tm.define("TitleScene", {
                     fillStyle: "#fff",
                     fontSize: 32,
                     fontFamily: FONT_FAMILY,
+                    // todo:当日有効にする
+                    //text: "v2.0",
                     text: "v1.1",
                     align: "center",
                 },
@@ -614,19 +617,55 @@ tm.define("TitleScene", {
                     x: SCREEN_CENTER_X,
                     y: SCREEN_CENTER_Y + SCREEN_CENTER_Y / 2,
                 },
+                {
+                    type: "FlatButton", name: "nmlsButton",
+                    init: [
+                        {
+                            text: "NMLS",
+                            fontFamily: FONT_FAMILY,
+                            fontSize: 96,
+                            bgColor: "hsl(240, 0%, 70%)",
+                        }
+                    ],
+                    x: SCREEN_CENTER_X,
+                    y: SCREEN_CENTER_Y + SCREEN_CENTER_Y / 2 + 128 + 64,
+                    alpha: 1.0,
+                },
             ]
         });
 
         this.localTimer = 0;
 
+        // プレイデータのLOAD
+        // todo:当日有効にする
+        if (false) {
+            let tmp = null;
+            tmp = localStorage.getItem('trcng.tpc');
+            totalPlayCount = (tmp === null) ? 0 : parseInt(tmp);
+            if (totalPlayCount >= 1) {
+                this.nmlsButton.wakeUp();
+                this.nmlsButton.setAlpha(1.0);
+            } else {
+                this.nmlsButton.sleep();
+                this.nmlsButton.setAlpha(0.0);
+            }
+        } else {
+            this.nmlsButton.sleep();
+            this.nmlsButton.setAlpha(0.0);
+        }
+
         var self = this;
         this.startButton.onpointingstart = function () {
             self.app.replaceScene(GameScene());
+        };
+        this.nmlsButton.onpointingstart = function () {
+            window.location.href = "../NMLSG/";
         };
     },
 
     update: function (app) {
         app.background = "rgba(0, 0, 0, 1.0)"; // 背景色
+
         // 時間が来たらデモへ
         //        if(++this.localTimer >= 5*FPS){
         //            this.app.replaceScene(DemoScene());
@@ -1145,7 +1184,11 @@ tm.define("GameScene", {
             case GAME_MODE.GAME_OVER_INIT:
                 gameoverSE.play();
                 var self = this;
+                // 実績チェック＆セーブ
+                checkTrophy();
                 // tweet ボタン
+                // todo:当日有効にする
+                //var tmpStr = "TARACHINE GO v2.0\n";
                 var tmpStr = "TARACHINE GO v1.1\n";
                 tmpStr += trcnNum + "タラチネ\n" + nowScore + "てん\n";
                 this.tweetButton.onclick = function () {
@@ -1814,4 +1857,12 @@ function calcDist(aX, aY, bX, bY) {
 }
 function calcDistVec(aVec, bVec) {
     return Math.sqrt(Math.pow(aVec.x - bVec.x, 2) + Math.pow(aVec.y - bVec.y, 2));
+}
+
+// 実績チェック＆Save
+function checkTrophy() {
+    // 累計プレイ回数
+    if (totalPlayCount < 1) totalPlayCount++;
+    // todo:当日有効にする
+    //    localStorage.setItem('trcng.tpc', totalPlayCount);
 }
