@@ -599,9 +599,7 @@ tm.define("TitleScene", {
                     fillStyle: "#fff",
                     fontSize: 32,
                     fontFamily: FONT_FAMILY,
-                    // todo:当日有効にする
-                    //text: "v2.0",
-                    text: "v1.1",
+                    text: "v2.0",
                     align: "center",
                 },
                 {
@@ -637,8 +635,7 @@ tm.define("TitleScene", {
         this.localTimer = 0;
 
         // プレイデータのLOAD
-        // todo:当日有効にする
-        if (false) {
+        {
             let tmp = null;
             tmp = localStorage.getItem('trcng.tpc');
             totalPlayCount = (tmp === null) ? 0 : parseInt(tmp);
@@ -649,9 +646,6 @@ tm.define("TitleScene", {
                 this.nmlsButton.sleep();
                 this.nmlsButton.setAlpha(0.0);
             }
-        } else {
-            this.nmlsButton.sleep();
-            this.nmlsButton.setAlpha(0.0);
         }
 
         var self = this;
@@ -1187,9 +1181,7 @@ tm.define("GameScene", {
                 // 実績チェック＆セーブ
                 checkTrophy();
                 // tweet ボタン
-                // todo:当日有効にする
-                //var tmpStr = "TARACHINE GO v2.0\n";
-                var tmpStr = "TARACHINE GO v1.1\n";
+                var tmpStr = "TARACHINE GO v2.0\n";
                 tmpStr += trcnNum + "タラチネ\n" + nowScore + "てん\n";
                 this.tweetButton.onclick = function () {
                     var twitterURL = tm.social.Twitter.createURL({
@@ -1863,6 +1855,5 @@ function calcDistVec(aVec, bVec) {
 function checkTrophy() {
     // 累計プレイ回数
     if (totalPlayCount < 1) totalPlayCount++;
-    // todo:当日有効にする
-    //    localStorage.setItem('trcng.tpc', totalPlayCount);
+    localStorage.setItem('trcng.tpc', totalPlayCount);
 }
