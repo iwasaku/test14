@@ -1,3 +1,5 @@
+phina.globalize();
+
 console.log = function () { };  // ログを出す時にはコメントアウトする
 
 const FPS = 60;  // 60フレ
@@ -9,35 +11,29 @@ const SCREEN_CENTER_Y = SCREEN_HEIGHT / 2;  // スクリーン高さの半分
 
 const FONT_FAMILY = "'misaki_gothic','Meiryo',sans-serif";
 const ASSETS = {
-    "tball": "./resource/tball.png?20230503",
-    "field": "./resource/field_64.png",
-    "trcn": "./resource/trcn01.png",
+    font: {
+        "misaki_gothic": "https://cdn.leafscape.be/misaki/misaki_gothic_web.woff2"
+    },
+    image: {
+        "tball": "./resource/tball.png?20230503",
+        "field": "./resource/field_64.png",
+        "trcn": "./resource/trcn01.png",
+    },
+    sound: {
+        //出現時
+        "appear_se": 'https://iwasaku.github.io/test14/TRCNG/resource/appear.mp3',
+        //投げた時
+        "throw_se": 'https://iwasaku.github.io/test14/TRCNG/resource/throw.mp3',
+        //当たった時
+        "hit_se": 'https://iwasaku.github.io/test14/TRCNG/resource/hit.mp3',
+        //カウント
+        "count_se": 'https://iwasaku.github.io/test14/TRCNG/resource/count.mp3',
+        //ゲット
+        "get_se": 'https://iwasaku.github.io/test14/TRCNG/resource/get.mp3',
+        //GAME OVER
+        "game_over_se": 'https://iwasaku.github.io/test11/UT-404/SSS2/resource/t02/12.mp3',
+    }
 };
-
-//出現時
-const appearSE = new Howl({
-    src: 'https://iwasaku.github.io/test14/TRCNG/resource/appear.mp3'
-});
-//投げた時
-const throwSE = new Howl({
-    src: 'https://iwasaku.github.io/test14/TRCNG/resource/throw.mp3'
-});
-//当たった時
-const hitSE = new Howl({
-    src: 'https://iwasaku.github.io/test14/TRCNG/resource/hit.mp3'
-});
-//カウント
-const countSE = new Howl({
-    src: 'https://iwasaku.github.io/test14/TRCNG/resource/count.mp3'
-});
-//ゲット
-const getSE = new Howl({
-    src: 'https://iwasaku.github.io/test14/TRCNG/resource/get.mp3'
-});
-//GAMEOVER
-const gameoverSE = new Howl({
-    src: 'https://iwasaku.github.io/test11/UT-404/SSS2/resource/t02/12.mp3'
-});
 
 // ゲームモード
 let tmpEnumValue = 0;
@@ -479,6 +475,7 @@ let group0 = null;  // BG
 let group1 = null;  // TRCN
 let group2 = null;  // TGT_RING
 let group3 = null;  // TBALL
+let group4 = null;  // ラベル類
 let tball = null;
 let trcn = null;
 let tgtRingW = null;    // 白
@@ -488,10 +485,10 @@ let tgtRingO = null;    // 朱
 let tgtRingR = null;    // 赤
 let trcnNum = 0;
 let ballNum = 0;
-let orgTrcnPos = tm.geom.Vector2(0, 0);
-let bounceFrom = tm.geom.Vector2(0, 0);
-let bounceTo = tm.geom.Vector2(0, 0);
-let bounceDelta = tm.geom.Vector2(0, 0);
+let orgTrcnPos = phina.geom.Vector2(0, 0);
+let bounceFrom = phina.geom.Vector2(0, 0);
+let bounceTo = phina.geom.Vector2(0, 0);
+let bounceDelta = phina.geom.Vector2(0, 0);
 let bounceCounter = 0;
 let countNum = 0;
 let countNumCounter = 0;
@@ -503,134 +500,169 @@ let randomSeed = 3557;
 let randomMode = Boolean(1);
 let totalPlayCount = 0;
 
-
-tm.main(function () {
-    // アプリケーションクラスを生成
-    var app = tm.display.CanvasApp("#world");
-    app.resize(SCREEN_WIDTH, SCREEN_HEIGHT);    // サイズ(解像度)設定
-    app.fitWindow();                            // 自動フィッティング有効
-    app.background = "rgba(77, 136, 255, 1.0)"; // 背景色
-    app.fps = FPS;                               // フレーム数
-
-    var loading = tm.ui.LoadingScene({
-        assets: ASSETS,
+phina.main(function () {
+    var app = GameApp({
+        startLabel: 'logo',
         width: SCREEN_WIDTH,
         height: SCREEN_HEIGHT,
+        assets: ASSETS,
+        fps: FPS,
+        backgroundColor: 'black',
+
+        // シーンのリストを引数で渡す
+        scenes: [
+            {
+                className: 'LogoScene',
+                label: 'logo',
+                nextLabel: 'title',
+            },
+            {
+                className: 'TitleScene',
+                label: 'title',
+                nextLabel: 'game',
+            },
+            {
+                className: 'GameScene',
+                label: 'game',
+                nextLabel: 'game',
+            },
+        ]
     });
 
-    // 読み込み完了後に呼ばれるメソッドを登録
-    loading.onload = function () {
-        app.replaceScene(LogoScene());
-    };
+    // iOSなどでユーザー操作がないと音がならない仕様対策
+    // 起動後初めて画面をタッチした時に『無音』を鳴らす
+    app.domElement.addEventListener('touchend', function dummy() {
+        var s = phina.asset.Sound();
+        s.loadFromBuffer();
+        s.play().stop();
+        app.domElement.removeEventListener('touchend', dummy);
+    });
 
-    // ローディングシーンに入れ替える
-    app.replaceScene(loading);
+    // fps表示
+    //app.enableStats();
 
     // 実行
     app.run();
 });
 
 /*
+* ローディング画面をオーバーライド
+*/
+phina.define('LoadingScene', {
+    superClass: 'DisplayScene',
+
+    init: function (options) {
+        this.superInit(options);
+        // 背景色
+        var self = this;
+        var loader = phina.asset.AssetLoader();
+
+        // 明滅するラベル
+        let label = phina.display.Label({
+            text: "",
+            fontSize: 64,
+            fill: 'white',
+        }).addChildTo(this).setPosition(SCREEN_CENTER_X, SCREEN_CENTER_Y);
+
+        // ロードが進行したときの処理
+        loader.onprogress = function (e) {
+            // 進捗具合を％で表示する
+            label.text = "{0}%".format((e.progress * 100).toFixed(0));
+        };
+
+        // ローダーによるロード完了ハンドラ
+        loader.onload = function () {
+            // Appコアにロード完了を伝える（==次のSceneへ移行）
+            self.flare('loaded');
+        };
+
+        // ロード開始
+        loader.load(options.assets);
+    },
+});
+
+/*
  * ロゴ
  */
-tm.define("LogoScene", {
-    superClass: "tm.app.Scene",
+phina.define("LogoScene", {
+    superClass: 'DisplayScene',
 
-    init: function () {
-        this.superInit();
-        this.fromJSON({
-            children: [
-                {
-                    type: "Label", name: "logoLabel",
-                    x: SCREEN_CENTER_X,
-                    y: SCREEN_CENTER_Y,
-                    fillStyle: "#888",
-                    fontSize: 64,
-                    fontFamily: FONT_FAMILY,
-                    text: "UNOFFICIAL GAME",
-                    align: "center",
-                },
-            ]
-        });
+    init: function (option) {
+        this.superInit(option);
         this.localTimer = 0;
     },
 
     update: function (app) {
-        // 時間が来たらタイトルへ
-        //        if (++this.localTimer >= 5 * FPS)
-        this.app.replaceScene(TitleScene());
+        // フォント読み込み待ち
+        var self = this;
+        document.fonts.load('12px "misaki_gothic"').then(function () {
+            self.exit();
+        });
     }
 });
 
 /*
  * タイトル
  */
-tm.define("TitleScene", {
-    superClass: "tm.app.Scene",
+phina.define("TitleScene", {
+    superClass: 'DisplayScene',
 
-    init: function () {
-        this.superInit();
-        this.fromJSON({
-            children: [
-                {
-                    type: "Label", name: "title1Label",
-                    x: SCREEN_CENTER_X,
-                    y: SCREEN_CENTER_Y - SCREEN_CENTER_Y / 3,
-                    fillStyle: "#fff",
-                    fontSize: 128 + 96,
-                    fontFamily: FONT_FAMILY,
-                    text: "TARACHINE",
-                    align: "center",
-                },
-                {
-                    type: "Label", name: "title2Label",
-                    x: SCREEN_CENTER_X,
-                    y: SCREEN_CENTER_Y,
-                    fillStyle: "#fff",
-                    fontSize: 256 + 96,
-                    fontFamily: FONT_FAMILY,
-                    text: "ＧＯ",
-                    align: "center",
-                },
-                {
-                    type: "Label", name: "versionLabel",
-                    x: SCREEN_CENTER_X + 256 + 128,
-                    y: SCREEN_CENTER_Y + 128,
-                    fillStyle: "#fff",
-                    fontSize: 32,
-                    fontFamily: FONT_FAMILY,
-                    text: "v2.0",
-                    align: "center",
-                },
-                {
-                    type: "FlatButton", name: "startButton",
-                    init: [
-                        {
-                            text: "START",
-                            fontFamily: FONT_FAMILY,
-                            fontSize: 96,
-                            bgColor: "hsl(240, 0%, 70%)",
-                        }
-                    ],
-                    x: SCREEN_CENTER_X,
-                    y: SCREEN_CENTER_Y + SCREEN_CENTER_Y / 2,
-                },
-                {
-                    type: "FlatButton", name: "nmlsButton",
-                    init: [
-                        {
-                            text: "NMLS",
-                            fontFamily: FONT_FAMILY,
-                            fontSize: 96,
-                            bgColor: "hsl(240, 0%, 70%)",
-                        }
-                    ],
-                    x: SCREEN_CENTER_X,
-                    y: SCREEN_CENTER_Y + SCREEN_CENTER_Y / 2 + 128 + 64,
-                    alpha: 1.0,
-                },
-            ]
-        });
+    init: function (option) {
+        this.superInit(option);
+        this.backgroundColor = 'black';
+
+        this.title1Label = Label({
+            text: "TARACHINE",
+            fontSize: 128 + 96,
+            fontFamily: FONT_FAMILY,
+            align: "center",
+            fill: "#fff",
+            x: SCREEN_CENTER_X,
+            y: SCREEN_CENTER_Y - SCREEN_CENTER_Y / 3,
+        }).addChildTo(this);
+        this.title2Label = Label({
+            text: "ＧＯ",
+            fontSize: 256 + 96,
+            fontFamily: FONT_FAMILY,
+            align: "center",
+            fill: "#fff",
+            x: SCREEN_CENTER_X,
+            y: SCREEN_CENTER_Y,
+        }).addChildTo(this);
+        this.versionLabel = Label({
+            text: "v2.0",
+            fontSize: 32,
+            fontFamily: FONT_FAMILY,
+            align: "center",
+            fill: "#fff",
+            x: SCREEN_CENTER_X + 256 + 128,
+            y: SCREEN_CENTER_Y + 128,
+        }).addChildTo(this);
+
+        this.startButton = Button({
+            text: "START",
+            fontSize: 96,
+            fontFamily: FONT_FAMILY,
+            fill: "hsl(240, 0%, 70%)",
+            x: SCREEN_CENTER_X,
+            y: SCREEN_CENTER_Y + SCREEN_CENTER_Y / 2,
+            cornerRadius: 8,
+            width: 512,
+            height: 160,
+        }).addChildTo(this);
+        this.startButton.alpha = 1.0;
+        this.nmlsButton = Button({
+            text: "NMLS",
+            fontFamily: FONT_FAMILY,
+            fontSize: 96,
+            fill: "hsl(240, 0%, 70%)",
+            x: SCREEN_CENTER_X,
+            y: SCREEN_CENTER_Y + SCREEN_CENTER_Y / 2 + 128 + 64,
+            cornerRadius: 8,
+            width: 512,
+            height: 160,
+        }).addChildTo(this);
+        this.nmlsButton.alpha = 0.0;
 
         this.localTimer = 0;
 
@@ -641,88 +673,45 @@ tm.define("TitleScene", {
             totalPlayCount = (tmp === null) ? 0 : parseInt(tmp);
             if (totalPlayCount >= 1) {
                 this.nmlsButton.wakeUp();
-                this.nmlsButton.setAlpha(1.0);
+                this.nmlsButton.alpha = 1.0;
             } else {
                 this.nmlsButton.sleep();
-                this.nmlsButton.setAlpha(0.0);
+                this.nmlsButton.alpha = 0.0;
             }
         }
 
         var self = this;
-        this.startButton.onpointingstart = function () {
-            self.app.replaceScene(GameScene());
+        this.startButton.onpointstart = function () {
+            self.exit();
         };
-        this.nmlsButton.onpointingstart = function () {
+        this.nmlsButton.onpointstart = function () {
             window.location.href = "../NMLSG/";
         };
     },
 
     update: function (app) {
-        app.background = "rgba(0, 0, 0, 1.0)"; // 背景色
-
-        // 時間が来たらデモへ
-        //        if(++this.localTimer >= 5*FPS){
-        //            this.app.replaceScene(DemoScene());
-        //        }
-    }
-});
-
-/*
- * デモ
- */
-tm.define("DemoScene", {
-    superClass: "tm.app.Scene",
-
-    init: function () {
-        this.superInit();
-        this.fromJSON({
-            children: [
-                {
-                    type: "Label", name: "demoLabel",
-                    x: SCREEN_CENTER_X,
-                    y: 320,
-                    fillStyle: "#888",
-                    fontSize: 64,
-                    fontFamily: FONT_FAMILY,
-                    text: "",
-                    align: "center",
-                },
-            ]
-        });
-        this.localTimer = 0;
-    },
-
-    update: function (app) {
-        // 時間が来たらタイトルへ
-        if (++this.localTimer >= 5 * FPS) {
-            this.app.replaceScene(TitleScene());
-        }
-
-        // タッチしたらタイトルへ
-        var pointing = app.pointing;
-        // タッチしているかを判定
-        if (pointing.getPointing()) {
-            this.app.replaceScene(TitleScene());
-        }
     }
 });
 
 /*
  * ゲーム
  */
-tm.define("GameScene", {
-    superClass: "tm.app.Scene",
+phina.define("GameScene", {
+    superClass: 'DisplayScene',
 
-    init: function () {
-        this.superInit();
+    init: function (option) {
+        this.superInit(option);
+        this.backgroundColor = 'black';
+
         gameMode = GAME_MODE.GAME_INIT;
-        group0 = tm.display.CanvasElement().addChildTo(this);
-        group1 = tm.display.CanvasElement().addChildTo(this);
-        group2 = tm.display.CanvasElement().addChildTo(this);
-        group3 = tm.display.CanvasElement().addChildTo(this);
+        group0 = DisplayElement().addChildTo(this);
+        group1 = DisplayElement().addChildTo(this);
+        group2 = DisplayElement().addChildTo(this);
+        group3 = DisplayElement().addChildTo(this);
+        group4 = DisplayElement().addChildTo(this);
 
-        this.bgField = tm.display.Sprite("field", SCREEN_WIDTH, SCREEN_HEIGHT).addChildTo(group0);
-        this.bgField.setPosition(SCREEN_CENTER_X, SCREEN_CENTER_Y);
+        this.bgField = phina.display.Sprite("field").addChildTo(group0);
+        this.bgField.setPosition(SCREEN_CENTER_X, SCREEN_CENTER_Y).setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
 
         trcn = new Trcn().addChildTo(group1);
         tgtRingW = new TargetRing("#ffffff", 1).addChildTo(group2);
@@ -732,175 +721,160 @@ tm.define("GameScene", {
         tgtRingR = new TargetRing("#ff0000", 0).addChildTo(group2);
         tball = new TBall().addChildTo(group3);
 
-        this.fromJSON({
-            children: [
-                {
-                    type: "Label", name: "nowTrcnNumLabel",
-                    x: SCREEN_WIDTH - 32,
-                    y: 32 + 32,
-                    fillStyle: "#fff",
-                    shadowColor: "#000",
-                    shadowBlur: 10,
-                    fontSize: 64,
-                    fontFamily: FONT_FAMILY,
-                    text: "0タラチネ",
-                    align: "right",
-                },
-                {
-                    type: "Label", name: "nowScoreLabel",
-                    x: SCREEN_WIDTH - 32,
-                    y: 64 + 32 + 32,
-                    fillStyle: "#fff",
-                    shadowColor: "#000",
-                    shadowBlur: 10,
-                    fontSize: 64,
-                    fontFamily: FONT_FAMILY,
-                    text: "0てん",
-                    align: "right",
-                },
-                {
-                    type: "Label", name: "ballNumLabel",
-                    x: SCREEN_CENTER_X + 128 + 64,
-                    y: SCREEN_HEIGHT - 256 + 64,
-                    fillStyle: "#fff",
-                    shadowColor: "#000",
-                    shadowBlur: 10,
-                    fontSize: 64,
-                    fontFamily: FONT_FAMILY,
-                    text: "10",
-                    align: "right",
-                },
-                {
-                    type: "Label", name: "gameOverLabel",
-                    x: SCREEN_CENTER_X,
-                    y: SCREEN_CENTER_Y / 2,
-                    fillStyle: "#fff",
-                    shadowColor: "#000",
-                    shadowBlur: 10,
-                    fontSize: 256 - 32,
-                    fontFamily: FONT_FAMILY,
-                    text: "GAME OVER",
-                    align: "center",
-                },
-                {
-                    type: "Label", name: "resultLabel",
-                    x: SCREEN_CENTER_X,
-                    y: SCREEN_CENTER_Y / 2 + 256,
-                    fillStyle: "#fff",
-                    shadowColor: "#000",
-                    shadowBlur: 10,
-                    fontSize: 96,
-                    fontFamily: FONT_FAMILY,
-                    text: "0タラチネ\n0てん",
-                    align: "center",
-                },
-                {
-                    type: "Label", name: "appearLabel",
-                    x: SCREEN_CENTER_X,
-                    y: SCREEN_CENTER_Y / 2,
-                    fillStyle: "#fff",
-                    shadowColor: "#000",
-                    shadowBlur: 10,
-                    fontSize: 64,
-                    fontFamily: FONT_FAMILY,
-                    text: "あ！やせいのタラチネが\nとびだしてきた",
-                    align: "center",
-                },
-                {
-                    type: "Label", name: "hitTypeLabel",
-                    x: SCREEN_CENTER_X,
-                    y: SCREEN_CENTER_Y,
-                    fillStyle: "#fff",
-                    shadowColor: "#000",
-                    shadowBlur: 10,
-                    fontSize: 128,
-                    fontFamily: FONT_FAMILY,
-                    text: "",
-                    align: "center",
-                },
-                {
-                    type: "Label", name: "countNumLabel",
-                    x: SCREEN_CENTER_X + 64,
-                    y: SCREEN_CENTER_Y + 64,
-                    fillStyle: "#fff",
-                    shadowColor: "#000",
-                    shadowBlur: 10,
-                    fontSize: 1024,
-                    fontFamily: FONT_FAMILY,
-                    text: "1",
-                    align: "center",
-                },
-                {
-                    type: "Label", name: "successLabel",
-                    x: SCREEN_CENTER_X,
-                    y: SCREEN_CENTER_Y / 2,
-                    fillStyle: "#fff",
-                    shadowColor: "#000",
-                    shadowBlur: 10,
-                    fontSize: 64,
-                    fontFamily: FONT_FAMILY,
-                    text: "やったー！\nタラチネをつかまえた！",
-                    align: "center",
-                },
-                {
-                    type: "Label", name: "runawayLabel",
-                    x: SCREEN_CENTER_X,
-                    y: SCREEN_CENTER_Y / 2,
-                    fillStyle: "#fff",
-                    shadowColor: "#000",
-                    shadowBlur: 10,
-                    fontSize: 64,
-                    fontFamily: FONT_FAMILY,
-                    text: "あ！ボールから抜け出した",
-                    align: "center",
-                },
-                {
-                    type: "FlatButton", name: "tweetButton",
-                    init: [
-                        {
-                            text: "TWEET",
-                            fontFamily: FONT_FAMILY,
-                            fontSize: 80,
-                            bgColor: "hsl(240, 80%, 70%)",
-                        }
-                    ],
-                    x: SCREEN_CENTER_X - 256,
-                    y: SCREEN_CENTER_Y + (SCREEN_CENTER_Y / 2),
-                    alpha: 0.0,
-                },
-                {
-                    type: "FlatButton", name: "restartButton",
-                    init: [
-                        {
-                            text: "RESTART",
-                            fontFamily: FONT_FAMILY,
-                            fontSize: 80,
-                            bgColor: "hsl(240, 0%, 70%)",
-                        }
-                    ],
-                    x: SCREEN_CENTER_X + 256,
-                    y: SCREEN_CENTER_Y + (SCREEN_CENTER_Y / 2),
-                    alpha: 0.0,
-                },
-            ]
-        });
+        this.nowTrcnNumLabel = Label({
+            text: "0タラチネ",
+            fontSize: 64,
+            fontFamily: FONT_FAMILY,
+            align: "right",
+            fill: "#fff",
+            shadow: "#000",
+            shadowBlur: 10,
+            x: SCREEN_WIDTH - 32,
+            y: 32 + 32,
+        }).addChildTo(group4);
+        this.nowScoreLabel = Label({
+            text: "0てん",
+            fontSize: 64,
+            fontFamily: FONT_FAMILY,
+            align: "right",
+            fill: "#fff",
+            shadow: "#000",
+            shadowBlur: 10,
+            x: SCREEN_WIDTH - 32,
+            y: 64 + 32 + 32,
+        }).addChildTo(group4);
+        this.ballNumLabel = Label({
+            text: "10",
+            fontSize: 64,
+            fontFamily: FONT_FAMILY,
+            align: "right",
+            fill: "#fff",
+            shadow: "#000",
+            shadowBlur: 10,
+            x: SCREEN_CENTER_X + 128 + 64,
+            y: SCREEN_HEIGHT - 256 + 64,
+        }).addChildTo(group4);
+        this.gameOverLabel = Label({
+            text: "GAME OVER",
+            fontSize: 256 - 32,
+            fontFamily: FONT_FAMILY,
+            align: "center",
+            fill: "#fff",
+            shadow: "#000",
+            shadowBlur: 10,
+            x: SCREEN_CENTER_X,
+            y: SCREEN_CENTER_Y / 2,
+        }).addChildTo(group4);
+        this.resultLabel = Label({
+            text: "0タラチネ\n0てん",
+            fontSize: 96,
+            fontFamily: FONT_FAMILY,
+            align: "center",
+            fill: "#fff",
+            shadow: "#000",
+            shadowBlur: 10,
+            x: SCREEN_CENTER_X,
+            y: SCREEN_CENTER_Y / 2 + (256 + 96),
+        }).addChildTo(group4);
+        this.appearLabel = Label({
+            text: "あ！やせいのタラチネが\nとびだしてきた",
+            fontSize: 64,
+            fontFamily: FONT_FAMILY,
+            align: "center",
+            fill: "#fff",
+            shadow: "#000",
+            shadowBlur: 10,
+            x: SCREEN_CENTER_X,
+            y: SCREEN_CENTER_Y / 2 + 96,
+        }).addChildTo(group4);
+        this.hitTypeLabel = Label({
+            text: "",
+            fontSize: 128,
+            fontFamily: FONT_FAMILY,
+            align: "center",
+            fill: "#fff",
+            shadow: "#000",
+            shadowBlur: 10,
+            x: SCREEN_CENTER_X,
+            y: SCREEN_CENTER_Y,
+        }).addChildTo(group4);
+        this.countNumLabel = Label({
+            text: "1",
+            fontSize: 1024,
+            fontFamily: FONT_FAMILY,
+            align: "center",
+            fill: "#fff",
+            shadow: "#000",
+            shadowBlur: 10,
+            x: SCREEN_CENTER_X + 64,
+            y: SCREEN_CENTER_Y + 64,
+        }).addChildTo(group4);
+        this.successLabel = Label({
+            text: "やったー！\nタラチネをつかまえた！",
+            fontSize: 64,
+            fontFamily: FONT_FAMILY,
+            align: "center",
+            fill: "#fff",
+            shadow: "#000",
+            shadowBlur: 10,
+            x: SCREEN_CENTER_X,
+            y: SCREEN_CENTER_Y,
+        }).addChildTo(group4);
+        this.runawayLabel = Label({
+            text: "あ！ボールから抜け出した",
+            fontSize: 64,
+            fontFamily: FONT_FAMILY,
+            align: "center",
+            fill: "#fff",
+            shadow: "#000",
+            shadowBlur: 10,
+            x: SCREEN_CENTER_X,
+            y: SCREEN_CENTER_Y / 2,
+        }).addChildTo(group4);
 
-        this.nowTrcnNumLabel.setAlpha(0.0);
-        this.nowScoreLabel.setAlpha(0.0);
-        this.ballNumLabel.setAlpha(0.0);
-        this.gameOverLabel.setAlpha(0.0);
-        this.resultLabel.setAlpha(0.0);
-        this.appearLabel.setAlpha(0.0);
-        this.hitTypeLabel.setAlpha(0.0);
-        this.countNumLabel.setAlpha(0.0);
-        this.successLabel.setAlpha(0.0);
-        this.runawayLabel.setAlpha(0.0);
+        this.tweetButton = Button({
+            text: "POST",
+            fontSize: 80,
+            fontFamily: FONT_FAMILY,
+            align: "center",
+            fill: "#7575EF",
+            x: SCREEN_CENTER_X - 256,
+            y: SCREEN_CENTER_Y + (SCREEN_CENTER_Y / 2),
+            cornerRadius: 8,
+            width: 320,
+            height: 120,
+        }).addChildTo(group4);
+        this.restartButton = Button({
+            text: "RESTART",
+            fontSize: 80,
+            fontFamily: FONT_FAMILY,
+            align: "center",
+            fill: "#B2B2B2",
+            x: SCREEN_CENTER_X + 256,
+            y: SCREEN_CENTER_Y + (SCREEN_CENTER_Y / 2),
+            cornerRadius: 8,
+            width: 320,
+            height: 120,
+        }).addChildTo(group4);
+
+        this.nowTrcnNumLabel.alpha = 0.0;
+        this.nowScoreLabel.alpha = 0.0;
+        this.ballNumLabel.alpha = 0.0;
+        this.gameOverLabel.alpha = 0.0;
+        this.resultLabel.alpha = 0.0;
+        this.appearLabel.alpha = 0.0;
+        this.hitTypeLabel.alpha = 0.0;
+        this.countNumLabel.alpha = 0.0;
+        this.successLabel.alpha = 0.0;
+        this.runawayLabel.alpha = 0.0;
+        this.tweetButton.alpha = 0.0;
         this.tweetButton.sleep();
+        this.restartButton.alpha = 0.0;
         this.restartButton.sleep();
 
         var self = this;
-        this.restartButton.onpointingstart = function () {
-            self.app.replaceScene(GameScene());
+        this.restartButton.onpointstart = function () {
+            self.exit();
         };
 
         this.buttonAlpha = 0.0;
@@ -918,9 +892,9 @@ tm.define("GameScene", {
         switch (gameMode) {
             case GAME_MODE.GAME_INIT:
                 gameMode = GAME_MODE.APPEAR_INIT;
-            // THROUGH
+            // FALLTHRU
             case GAME_MODE.APPEAR_INIT:
-                appearSE.play();
+                SoundManager.play("appear_se");
                 trcn.x = SCREEN_CENTER_X;
                 trcn.y = SCREEN_CENTER_Y;
                 trcn.setScale(1, 1);
@@ -928,25 +902,25 @@ tm.define("GameScene", {
                 trcn.atkTimer = myRandom2(atkTbl[trcnNum].min, atkTbl[trcnNum].max);
 
                 appearTimer = 1 * FPS;
-                this.appearLabel.setAlpha(1.0);
+                this.appearLabel.alpha = 1.0;
                 gameMode = GAME_MODE.APPEAR;
-            // THROUGH
+            // FALLTHRU
             case GAME_MODE.APPEAR:
                 if (--appearTimer > 0) {
                     break;
                 }
-                this.appearLabel.setAlpha(0.0);
+                this.appearLabel.alpha = 0.0;
 
                 gameMode = GAME_MODE.START_INIT;
-            // THROUGH
+            // FALLTHRU
             case GAME_MODE.START_INIT:
                 this.nowTrcnNumLabel.text = trcnNum + "タラチネ";
                 this.nowScoreLabel.text = nowScore + "てん";
                 this.ballNumLabel.text = ballNum + "";
 
-                this.nowTrcnNumLabel.setAlpha(1.0);
-                this.nowScoreLabel.setAlpha(1.0);
-                this.ballNumLabel.setAlpha(1.0);
+                this.nowTrcnNumLabel.alpha = 1.0;
+                this.nowScoreLabel.alpha = 1.0;
+                this.ballNumLabel.alpha = 1.0;
 
                 scoreTimer = 60 * FPS;   // 1min.
 
@@ -990,29 +964,29 @@ tm.define("GameScene", {
                 tgtRingO.sizeSpd = tmpSpd;
                 tgtRingR.sizeSpd = tmpSpd;
                 gameMode = GAME_MODE.START;
-            // THROUGH
+            // FALLTHRU
             case GAME_MODE.START:
                 if (--scoreTimer <= 0) scoreTimer = 0;
                 break;
             case GAME_MODE.THROW_INIT:
-                throwSE.play();
+                SoundManager.play("throw_se");
                 gameMode = GAME_MODE.THROW;
-            // THROUGH
+            // FALLTHRU
             case GAME_MODE.THROW:
-                this.nowTrcnNumLabel.setAlpha(0.0);
-                this.nowScoreLabel.setAlpha(0.0);
-                this.ballNumLabel.setAlpha(0.0);
+                this.nowTrcnNumLabel.alpha = 0.0;
+                this.nowScoreLabel.alpha = 0.0;
+                this.ballNumLabel.alpha = 0.0;
                 break;
             case GAME_MODE.HIT_INIT:
-                hitSE.play();
+                SoundManager.play("hit_se");
                 hitStep = 1;
-                this.hitTypeLabel.setAlpha(1.0);
+                this.hitTypeLabel.alpha = 1.0;
                 this.hitTypeLabel.text = tball.hitType.string;
                 tball.curveTimer = 0;
                 tball.zRot = 0;
                 tball.zRotOfs = 0;
                 gameMode = GAME_MODE.HIT;
-            // THROUGH
+            // FALLTHRU
             case GAME_MODE.HIT:
                 switch (hitStep) {
                     case 1:
@@ -1029,7 +1003,7 @@ tm.define("GameScene", {
                         bounceDelta.y = (bounceTo.y - bounceFrom.y) / 15.0;
                         bounceCounter = 0;
                         hitStep = 2;
-                    // THROUGH
+                    // FALLTHRU
                     case 2:
                         // step2:step1で求めた座標へtballを移動
                         if (++bounceCounter <= 15) {
@@ -1045,7 +1019,7 @@ tm.define("GameScene", {
                         bounceDelta.y = (bounceTo.y - bounceFrom.y) / 15.0;
                         bounceCounter = 0;
                         hitStep = 3;
-                    // THROUGH
+                    // FALLTHRU
                     case 3:
                         // step3:trcnを縮小しながらtballの座標へ移動
                         if (++bounceCounter <= 15) {
@@ -1063,7 +1037,7 @@ tm.define("GameScene", {
                         bounceDelta.y = (bounceTo.y - bounceFrom.y) / 15.0;
                         bounceCounter = 0;
 
-                        this.hitTypeLabel.setAlpha(0.0);
+                        this.hitTypeLabel.alpha = 0.0;
                         this.hitTypeLabel.text = "";
                         hitStep = 4;
                     case 4:
@@ -1081,33 +1055,33 @@ tm.define("GameScene", {
             case GAME_MODE.COUNT_INIT:
                 countNum = 1;
                 countNumCounter = 0;
-                countSE.play();
+                SoundManager.play("count_se");
                 if (tball.isGet === Boolean(1)) {
                     countNumDispCounter = 180;
                 } else {
                     countNumDispCounter = myRandom(30, 150);
                 }
                 this.countNumLabel.text = countNum;
-                this.countNumLabel.setAlpha(0.0);
+                this.countNumLabel.alpha = 0.0;
                 if (tball.hitType == HIT_TYPE.CRITICAL) {
                     gameMode = GAME_MODE.GET_INIT;
                 } else {
                     gameMode = GAME_MODE.COUNT;
                 }
-            // THROUGH
+            // FALLTHRU
             case GAME_MODE.COUNT:
                 if (--countNumDispCounter > 0) {
                     if (++countNumCounter < 60) {
-                        this.countNumLabel.setAlpha(countNumCounter / 60.0);
+                        this.countNumLabel.alpha = countNumCounter / 60.0;
                     } else {
                         countNum++;
                         countNumCounter = 0;
-                        countSE.play();
+                        SoundManager.play("count_se");
                         this.countNumLabel.text = countNum;
-                        this.countNumLabel.setAlpha(0.0);
+                        this.countNumLabel.alpha = 0.0;
                     }
                 } else {
-                    this.countNumLabel.setAlpha(0.0);
+                    this.countNumLabel.alpha = 0.0;
                     if (tball.isGet === Boolean(1)) {
                         gameMode = GAME_MODE.GET_INIT;
                     } else {
@@ -1116,17 +1090,17 @@ tm.define("GameScene", {
                 }
                 break;
             case GAME_MODE.GET_INIT:
-                getSE.play();
+                SoundManager.play("get_se");
                 successTimer = 2.5 * FPS;
-                this.successLabel.text = "やったー！\nタラチネをつかまえた！\n\n\n\n\n\n\n\n\n\n\n\n\n" + Math.trunc(tball.point) + "てん";
-                this.successLabel.setAlpha(1.0);
+                this.successLabel.text = "やったー！\nタラチネをつかまえた！\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" + Math.trunc(tball.point) + "てん";
+                this.successLabel.alpha = 1.0;
                 gameMode = GAME_MODE.GET;
-            // THROUGH
+            // FALLTHRU
             case GAME_MODE.GET:
                 if (--successTimer > 0) {
                     break;
                 }
-                this.successLabel.setAlpha(0.0);
+                this.successLabel.alpha = 0.0;
                 trcnNum++;
                 nowScore += Math.trunc(tball.point);
                 if (--ballNum <= 0) {
@@ -1142,10 +1116,10 @@ tm.define("GameScene", {
                 trcn.theta = startThetaTbl[trcnNum];
 
                 appearTimer = 1 * FPS;
-                this.runawayLabel.setAlpha(1.0);
+                this.runawayLabel.alpha = 1.0;
 
                 gameMode = GAME_MODE.RUNAWAY;
-            // THROUGH
+            // FALLTHRU
             case GAME_MODE.RUNAWAY:
                 if (--appearTimer > 0) {
                     tball.alpha -= 0.1;
@@ -1154,7 +1128,7 @@ tm.define("GameScene", {
                     }
                     break;
                 }
-                this.runawayLabel.setAlpha(0.0);
+                this.runawayLabel.alpha = 0.0;
 
                 if (--ballNum <= 0) {
                     gameMode = GAME_MODE.GAME_OVER_INIT;
@@ -1167,7 +1141,7 @@ tm.define("GameScene", {
                 tball.zRot = 0;
                 tball.zRotOfs = 0;
                 gameMode = GAME_MODE.MISS;
-            // THROUGH
+            // FALLTHRU
             case GAME_MODE.MISS:
                 if (--ballNum <= 0) {
                     gameMode = GAME_MODE.GAME_OVER_INIT;
@@ -1176,7 +1150,7 @@ tm.define("GameScene", {
                 }
                 break;
             case GAME_MODE.GAME_OVER_INIT:
-                gameoverSE.play();
+                SoundManager.play("game_over_se");
                 var self = this;
                 // 実績チェック＆セーブ
                 checkTrophy();
@@ -1184,7 +1158,7 @@ tm.define("GameScene", {
                 var tmpStr = "TARACHINE GO v2.0\n";
                 tmpStr += trcnNum + "タラチネ\n" + nowScore + "てん\n";
                 this.tweetButton.onclick = function () {
-                    var twitterURL = tm.social.Twitter.createURL({
+                    var twitterURL = phina.social.Twitter.createURL({
                         type: "tweet",
                         text: tmpStr,
                         hashtags: ["TARACHINE"],
@@ -1195,16 +1169,16 @@ tm.define("GameScene", {
                 this.ballNumLabel.text = "" + ballNum;
                 this.resultLabel.text = trcnNum + "タラチネ\n" + nowScore + "てん\n";
                 gameMode = GAME_MODE.GAME_OVER;
-            // THROUGH
+            // FALLTHRU
             case GAME_MODE.GAME_OVER:
                 this.buttonAlpha += 0.05;
                 if (this.buttonAlpha > 1.0) {
                     this.buttonAlpha = 1.0;
                 }
-                this.gameOverLabel.setAlpha(this.buttonAlpha);
-                this.resultLabel.setAlpha(this.buttonAlpha);
-                this.tweetButton.setAlpha(this.buttonAlpha);
-                this.restartButton.setAlpha(this.buttonAlpha);
+                this.gameOverLabel.alpha = this.buttonAlpha;
+                this.resultLabel.alpha = this.buttonAlpha;
+                this.tweetButton.alpha = this.buttonAlpha;
+                this.restartButton.alpha = this.buttonAlpha;
                 if (this.buttonAlpha > 0.7) {
                     this.tweetButton.wakeUp();
                     this.restartButton.wakeUp();
@@ -1217,15 +1191,15 @@ tm.define("GameScene", {
 /*
  * TrcnBall
  */
-tm.define("TBall", {
-    superClass: "tm.app.Sprite",
+phina.define("TBall", {
+    superClass: "Sprite",
 
-    init: function () {
-        this.superInit("tball", 256, 256);
+    init: function (option) {
+        this.superInit("tball");
         this.direct = '';
         this.zRot = 0;
         this.zRotOfs = 0;
-        this.setPosition(SCREEN_CENTER_X, SCREEN_CENTER_Y + SCREEN_CENTER_Y * 3 / 4).setScale(1, 1);
+        this.setPosition(SCREEN_CENTER_X, SCREEN_CENTER_Y + SCREEN_CENTER_Y * 3 / 4).setSize(256, 256).setScale(1, 1);
         this.setInteractive(false);
         this.setBoundingType("circle");
         this.radius = 16;
@@ -1235,13 +1209,13 @@ tm.define("TBall", {
         this.status = TB_STATUS.INIT;
 
         this.moveCounter = 0;
-        this.orgPos = tm.geom.Vector2(this.x, this.y);
+        this.orgPos = phina.geom.Vector2(this.x, this.y);
         this.point = 0;
         this.hitType = HIT_TYPE.NONE;
         this.size = 1;
         this.isGet = Boolean(0);
-        this.centerPos = tm.geom.Vector2(0, 0);
-        this.correctDelta = tm.geom.Vector2(0, 0);
+        this.centerPos = phina.geom.Vector2(0, 0);
+        this.correctDelta = phina.geom.Vector2(0, 0);
         this.curveTimer = 0;
         this.leftCurve = Boolean(0);
         this.rightCurve = Boolean(0);
@@ -1360,7 +1334,7 @@ tm.define("TBall", {
         }
 
         if (gameMode.tap_tball === Boolean(1)) {
-            var pointing = app.pointing;
+            var pointing = app.pointer;
             if (pointing.getPointingEnd()) {
                 // 指を離した
 
@@ -1568,18 +1542,18 @@ tm.define("TBall", {
                 // タッチした位置に徐々に近づける
                 this.x += (pointing.x - this.x) * 0.3;
                 this.y += (pointing.y - this.y) * 0.3;
-                let tmpVec = tm.geom.Vector2(this.x, this.y);
+                let tmpVec = phina.geom.Vector2(this.x, this.y);
                 this.vecArray.push(tmpVec);
                 if (this.vecArray.length > 30) {
                     this.vecArray.shift();
                     // 円起動チェック
                     // 全ての点の平均（＝予想中心点）を求める
-                    let tmpAllPos = tm.geom.Vector2(0, 0);
+                    let tmpAllPos = phina.geom.Vector2(0, 0);
                     this.vecArray.forEach(function (element) {
                         tmpAllPos.x += element.x;
                         tmpAllPos.y += element.y;
                     });
-                    this.centerPos = tm.geom.Vector2(0, 0);
+                    this.centerPos = phina.geom.Vector2(0, 0);
                     this.centerPos.x = tmpAllPos.x / this.vecArray.length;
                     this.centerPos.y = tmpAllPos.y / this.vecArray.length;
                     // 全ての点と予想中心点との距離（＝予想半径）の平均、最大、最小値を求める
@@ -1624,20 +1598,20 @@ tm.define("TBall", {
 /*
 * ターゲットリング
 */
-tm.define("TargetRing", {
+phina.define("TargetRing", {
     //円を表示するクラスを継承
-    superClass: "tm.display.CircleShape",
+    superClass: "phina.display.CircleShape",
     //初期化処理
     init: function (color, isFix) {
-        //継承元クラスの初期化 （幅、高さ、色）
-        this.superInit(512, 512, {
-            fillStyle: "transparent",
-            strokeStyle: color,
-            lineWidth: 10
+        this.superInit({
+            radius: 512,
+            backgroundColor: "transparent",
+            fill: null,
+            stroke: color,
+            strokeWidth: 10
         });
         this.x = trcn.x;
         this.y = trcn.y;
-        this.size = 512;
         this.isFix = isFix;
         this.dispFlag = Boolean(0);
         this.alpha = 0.0;
@@ -1659,27 +1633,28 @@ tm.define("TargetRing", {
         this.x = trcn.x;
         this.y = trcn.y;
         if (this.isFix === 1) return;
-        this.setSize(this.size, this.size);
         if (gameMode.move_tgtring === Boolean(1)) {
-            this.size -= this.sizeSpd;
-            if (this.size <= 0) this.size = 512;
+            let tmp = this.radius - this.sizeSpd;
+            if (tmp <= 0) tmp = 512;
+            this.radius = tmp;
         }
     },
 });
+
 /*
  * Trcn
  */
-tm.define("Trcn", {
-    superClass: "tm.app.Sprite",
+phina.define("Trcn", {
+    superClass: "Sprite",
 
-    init: function () {
+    init: function (option) {
         this.spriteName = "trcn";
-        this.superInit(this.spriteName, 512, 512);
+        this.superInit(this.spriteName);
         this.direct = '';
         this.setInteractive(false);
         this.setBoundingType("circle");
         this.radius = 80;
-        this.setPosition(SCREEN_CENTER_X, SCREEN_CENTER_Y).setScale(1, 1);
+        this.setPosition(SCREEN_CENTER_X, SCREEN_CENTER_Y).setSize(512, 512).setScale(1, 1);
         this.zRot = 0;
         this.atkTimer = myRandom2(atkTbl[trcnNum].min, atkTbl[trcnNum].max);
         this.zPos = 0;
@@ -1708,14 +1683,14 @@ tm.define("Trcn", {
                 this.xSpd = 1;
                 this.ySpd = 0;
                 this.status = TRCN_STATUS.WAIT;
-            // THROUGH
+            // FALLTHRU
             case TRCN_STATUS.WAIT:
                 this.status = TRCN_STATUS.MOVE_XY_INIT;
-            // THROUGH
+            // FALLTHRU
             case TRCN_STATUS.MOVE_XY_INIT:
                 this.setScale(1.0);
                 this.status = TRCN_STATUS.MOVE_XY;
-            // THROUGH
+            // FALLTHRU
             case TRCN_STATUS.MOVE_XY:
                 if (!gameMode.move_xy_trcn) {
                     break;
@@ -1801,7 +1776,7 @@ tm.define("Trcn", {
             case TRCN_STATUS.MOVE_Z_INIT:
                 this.zPos = 0.0;
                 this.status = TRCN_STATUS.MOVE_Z;
-            // THROUGH
+            // FALLTHRU
             case TRCN_STATUS.MOVE_Z:
                 this.zPos += 1.0;
                 if (this.zPos >= 1 * FPS) {
