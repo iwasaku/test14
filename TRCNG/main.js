@@ -500,6 +500,11 @@ let randomSeed = 3557;
 let randomMode = Boolean(1);
 let totalPlayCount = 0;
 
+// 共有ボタン用
+let postText = null;
+const postURL = "https://iwasaku.github.io/test14/TRCNG/";
+const postTags = "#ネムレス #NEMLESSS";
+
 phina.main(function () {
     var app = GameApp({
         startLabel: 'logo',
@@ -590,14 +595,22 @@ phina.define("LogoScene", {
     init: function (option) {
         this.superInit(option);
         this.localTimer = 0;
+        this.font1 = false;
+        this.font2 = false;
     },
 
     update: function (app) {
-        // フォント読み込み待ち
+        // フォントロード完了待ち
         var self = this;
-        document.fonts.load('12px "misaki_gothic"').then(function () {
-            self.exit();
+        document.fonts.load('10pt "misaki_gothic"').then(function () {
+            self.font1 = true;
         });
+        document.fonts.load('10pt "icomoon"').then(function () {
+            self.font2 = true;
+        });
+        if (this.font1 && this.font2) {
+            self.exit();
+        }
     }
 });
 
@@ -832,18 +845,67 @@ phina.define("GameScene", {
             y: SCREEN_CENTER_Y / 2,
         }).addChildTo(group4);
 
-        this.tweetButton = Button({
-            text: "POST",
+        // X
+        this.xButton = Button({
+            text: String.fromCharCode(0xe902),
             fontSize: 80,
-            fontFamily: FONT_FAMILY,
-            align: "center",
+            fontFamily: "icomoon",
+            fill: "#7575EF",
+            x: SCREEN_CENTER_X - 256 - 160,
+            y: SCREEN_CENTER_Y + (SCREEN_CENTER_Y / 2),
+            cornerRadius: 8,
+            width: 120,
+            height: 120,
+        }).addChildTo(group4);
+        this.xButton.onclick = function () {
+            // https://developer.x.com/en/docs/twitter-for-websites/tweet-button/guides/web-intent
+            let shareURL = "https://x.com/intent/tweet?text=" + encodeURIComponent(postText + "\n" + postTags + "\n") + "&url=" + encodeURIComponent(postURL);
+            window.open(shareURL);
+        };
+        this.xButton.alpha = 0.0;
+        this.xButton.sleep();
+
+        // threads
+        this.threadsButton = Button({
+            text: String.fromCharCode(0xe901),
+            fontSize: 80,
+            fontFamily: "icomoon",
             fill: "#7575EF",
             x: SCREEN_CENTER_X - 256,
             y: SCREEN_CENTER_Y + (SCREEN_CENTER_Y / 2),
             cornerRadius: 8,
-            width: 320,
+            width: 120,
             height: 120,
         }).addChildTo(group4);
+        this.threadsButton.onclick = function () {
+            // https://developers.facebook.com/docs/threads/threads-web-intents/
+            // web intentでのハッシュタグの扱いが環境（ブラウザ、iOS、Android）によって違いすぎるので『#』を削って通常の文字列にしておく
+            let shareURL = "https://www.threads.net/intent/post?text=" + encodeURIComponent(postText + "\n\n" + postTags.replace(/#/g, "")) + "&url=" + encodeURIComponent(postURL);
+            window.open(shareURL);
+        };
+        this.threadsButton.alpha = 0.0;
+        this.threadsButton.sleep();
+
+        // bluesky
+        this.bskyButton = Button({
+            text: String.fromCharCode(0xe900),
+            fontSize: 80,
+            fontFamily: "icomoon",
+            fill: "#7575EF",
+            x: SCREEN_CENTER_X - 256 + 160,
+            y: SCREEN_CENTER_Y + (SCREEN_CENTER_Y / 2),
+            cornerRadius: 8,
+            width: 120,
+            height: 120,
+        }).addChildTo(group4);
+        this.bskyButton.onclick = function () {
+            // https://docs.bsky.app/docs/advanced-guides/intent-links
+            let shareURL = "https://bsky.app/intent/compose?text=" + encodeURIComponent(postText + "\n" + postTags + "\n" + postURL);
+            window.open(shareURL);
+        };
+        this.bskyButton.alpha = 0.0;
+        this.bskyButton.sleep();
+
         this.restartButton = Button({
             text: "RESTART",
             fontSize: 80,
@@ -867,8 +929,6 @@ phina.define("GameScene", {
         this.countNumLabel.alpha = 0.0;
         this.successLabel.alpha = 0.0;
         this.runawayLabel.alpha = 0.0;
-        this.tweetButton.alpha = 0.0;
-        this.tweetButton.sleep();
         this.restartButton.alpha = 0.0;
         this.restartButton.sleep();
 
@@ -1154,18 +1214,10 @@ phina.define("GameScene", {
                 var self = this;
                 // 実績チェック＆セーブ
                 checkTrophy();
-                // tweet ボタン
-                var tmpStr = "TARACHINE GO v2.0\n";
-                tmpStr += trcnNum + "タラチネ\n" + nowScore + "てん\n";
-                this.tweetButton.onclick = function () {
-                    var twitterURL = phina.social.Twitter.createURL({
-                        type: "tweet",
-                        text: tmpStr,
-                        hashtags: ["TARACHINE"],
-                        url: "https://iwasaku.github.io/test14/TRCNG/",
-                    });
-                    window.open(twitterURL);
-                };
+
+                postText = "TARACHINE GO v2.0\n";
+                postText += trcnNum + "タラチネ\n" + nowScore + "てん";
+
                 this.ballNumLabel.text = "" + ballNum;
                 this.resultLabel.text = trcnNum + "タラチネ\n" + nowScore + "てん\n";
                 gameMode = GAME_MODE.GAME_OVER;
@@ -1177,10 +1229,14 @@ phina.define("GameScene", {
                 }
                 this.gameOverLabel.alpha = this.buttonAlpha;
                 this.resultLabel.alpha = this.buttonAlpha;
-                this.tweetButton.alpha = this.buttonAlpha;
+                this.xButton.alpha = this.buttonAlpha;
+                this.threadsButton.alpha = this.buttonAlpha;
+                this.bskyButton.alpha = this.buttonAlpha;
                 this.restartButton.alpha = this.buttonAlpha;
                 if (this.buttonAlpha > 0.7) {
-                    this.tweetButton.wakeUp();
+                    this.xButton.wakeUp();
+                    this.threadsButton.wakeUp();
+                    this.bskyButton.wakeUp();
                     this.restartButton.wakeUp();
                 }
                 break;
